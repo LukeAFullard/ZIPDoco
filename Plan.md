@@ -175,16 +175,16 @@ requirement, not a later optimization.
   - [ ] Build interactive diff UI displaying original vs repaired filenames before user confirmation.
 
 #### 2.4 Spoofer Shield
-- [ ] **2.4.1 Bidi & RTLO Character Detector**
-  - [ ] Flag filenames containing Right-to-Left Override (`\u202E`) and Unicode bidi control characters.
-- [ ] **2.4.2 Magic-Byte Format Validator**
-  - [ ] Implement file header magic-byte sniffing (first 512 bytes) and compare against extension claims.
-  - [ ] Flag mismatch anomalies (e.g. executable disguised as PDF).
-- [ ] **2.4.3 Disguised Executable & Risky Extension Scanner**
-  - [ ] Detect double extensions (`invoice.pdf.exe`).
-  - [ ] Flag high-risk social engineering file extensions (`.lnk`, `.hta`, `.scr`, `.exe`, `.bat`).
-- [ ] **2.4.4 Safety Summary Panel**
-  - [ ] Create consolidated "Safety Inspection" UI panel summarizing all detected security warnings.
+- [x] **2.4.1 Bidi & RTLO Character Detector**
+  - [x] Flag filenames containing Right-to-Left Override (`\u202E`) and Unicode bidi control characters.
+- [x] **2.4.2 Magic-Byte Format Validator**
+  - [x] Implement file header magic-byte sniffing (first 512 bytes) and compare against extension claims.
+  - [x] Flag mismatch anomalies (e.g. executable disguised as PDF).
+- [x] **2.4.3 Disguised Executable & Risky Extension Scanner**
+  - [x] Detect double extensions (`invoice.pdf.exe`).
+  - [x] Flag high-risk social engineering file extensions (`.lnk`, `.hta`, `.scr`, `.exe`, `.bat`).
+- [x] **2.4.4 Safety Summary Panel**
+  - [x] Create consolidated "Safety Inspection" UI panel summarizing all detected security warnings.
 
 ---
 
