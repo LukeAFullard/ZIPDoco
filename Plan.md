@@ -100,7 +100,7 @@ requirement, not a later optimization.
 #### 1.1 Universal Transcoder
 - [ ] **1.1.1 Input Processing & Volume Handling**
   - [ ] Implement drag-and-drop & File System Access API file loader.
-  - [ ] Implement multi-volume RAR (`.part1.rar`, `.part2.rar`) detection & volume aggregation prompt.
+  - [x] Implement multi-volume RAR (`.part1.rar`, `.part2.rar`) detection & volume aggregation prompt.
 - [ ] **1.1.2 Libarchive Streaming Decompressor**
   - [ ] Implement 4MB chunked Wasm input stream feeder into libarchive reader.
   - [ ] Extract file entries iteratively to OPFS scratch storage without staging full files in linear memory.
@@ -115,9 +115,9 @@ requirement, not a later optimization.
 - [x] **1.2.1 Pre-Flight Header Ratio Calculator**
   - [x] Parse archive central directory / header headers before decompressing file contents.
   - [x] Calculate global expansion ratio `sum(uncompressed_size) / sum(compressed_size)`.
-- [ ] **1.2.2 Threshold Trigger & User Intercept UI**
-  - [ ] Implement >100:1 ratio warning UI block requiring explicit user override.
-  - [ ] Enable single-entry sequential extraction fallback when override is granted.
+- [x] **1.2.2 Threshold Trigger & User Intercept UI**
+  - [x] Implement >100:1 ratio warning UI block requiring explicit user override.
+  - [x] Enable single-entry sequential extraction fallback when override is granted.
 - [x] **1.2.3 Nested Archive Matryoshka Scanner**
   - [x] Detect nested archive formats via magic-byte inspection on inner entry headers.
   - [x] Recurse expansion ratio check into nested archive entries before extraction.
@@ -191,13 +191,13 @@ requirement, not a later optimization.
 ### Milestone 3 — Batch Workflows & Integrity
 
 #### 3.1 Pre-Flight Leak Scanner
-- [ ] **3.1.1 Filename Credential Pattern Matching**
-  - [ ] Scan entry names against sensitive patterns (`.env`, `.pem`, `.key`, `id_rsa`, `.git/`, `credentials*`, `.aws/`).
-- [ ] **3.1.2 Content Shannon Entropy Analyzer**
-  - [ ] Calculate Shannon entropy on string tokens extracted from text files.
-  - [ ] Flag high-entropy tokens exceeding threshold (entropy > 4.0 over ≥20 chars).
-- [ ] **3.1.3 Secret Token Pattern Matcher**
-  - [ ] Add regex matchers for AWS keys (`AKIA...`), SSH private keys (`-----BEGIN...KEY-----`), JWTs, API tokens.
+- [x] **3.1.1 Filename Credential Pattern Matching**
+  - [x] Scan entry names against sensitive patterns (`.env`, `.pem`, `.key`, `id_rsa`, `.git/`, `credentials*`, `.aws/`).
+- [x] **3.1.2 Content Shannon Entropy Analyzer**
+  - [x] Calculate Shannon entropy on string tokens extracted from text files.
+  - [x] Flag high-entropy tokens exceeding threshold (entropy > 4.0 over ≥20 chars).
+- [x] **3.1.3 Secret Token Pattern Matcher**
+  - [x] Add regex matchers for AWS keys (`AKIA...`), SSH private keys (`-----BEGIN...KEY-----`), JWTs, API tokens.
 - [ ] **3.1.4 Purge Confirmation & Sanitized Repack**
   - [ ] Build confirmation modal listing detected secret files/tokens.
   - [ ] Provide one-click purge action removing flagged secrets from repack output stream.
