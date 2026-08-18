@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
-import { Archive, ShieldCheck, Upload, RefreshCw, KeyRound, Layers } from 'lucide-react';
+import { useState } from 'react';
+import { Archive, ShieldCheck, KeyRound, Layers, Trash2, CheckCircle2 } from 'lucide-react';
 import { SafetySummaryPanel } from './components/SafetySummaryPanel';
 import { ZipBombWarningPanel } from './components/ZipBombWarningPanel';
+import { FileDropZone } from './components/FileDropZone';
+import { PurgeConfirmationModal } from './components/PurgeConfirmationModal';
 import { scanEntrySecurity, type EntrySecurityReport } from './lib/security/spooferShield';
 import { checkZipBombThreshold, type ZipBombCheckResult, type ArchiveEntryMeta } from './lib/security/zipBomb';
 import { aggregateVolumeSet, type MultiVolumeSetReport } from './lib/transcoder/volumeDetector';
 import { scanEntryLeaks, type EntryLeakReport } from './lib/security/leakScanner';
 
-const SAMPLE_ENTRIES: ArchiveEntryMeta[] = [
+interface FileEntryItem {
+  name: string;
+  compressedSize?: number;
+  uncompressedSize?: number;
+  magicBytes?: Uint8Array;
+}
+
+const INITIAL_SAMPLE_ENTRIES: FileEntryItem[] = [
   { name: 'document_v2.pdf', compressedSize: 150000, uncompressedSize: 200000 },
   { name: 'financial_report.pdf', compressedSize: 100000, uncompressedSize: 120000, magicBytes: new Uint8Array([0x4d, 0x5a, 0x90, 0x00]) }, // PE Executable disguised as PDF!
   { name: 'invoice_2025.pdf.exe', compressedSize: 50000, uncompressedSize: 80000 }, // Double extension
@@ -17,6 +26,7 @@ const SAMPLE_ENTRIES: ArchiveEntryMeta[] = [
 ];
 
 function App() {
+  const [activeEntries, setActiveEntries] = useState<FileEntryItem[]>([]);
   const [reports, setReports] = useState<EntrySecurityReport[]>([]);
   const [zipBombResult, setZipBombResult] = useState<ZipBombCheckResult | null>(null);
   const [volumeReport, setVolumeReport] = useState<MultiVolumeSetReport | null>(null);
@@ -24,7 +34,12 @@ function App() {
   const [hasScanned, setHasScanned] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
 
-  const processEntries = (files: Array<{ name: string; compressedSize?: number; uncompressedSize?: number; magicBytes?: Uint8Array }>) => {
+  const [isPurgeModalOpen, setIsPurgeModalOpen] = useState(false);
+  const [purgedNotice, setPurgedNotice] = useState<string | null>(null);
+
+  const processEntries = (files: FileEntryItem[], nameLabel?: string) => {
+    setActiveEntries(files);
+
     // 1. Spoofer Shield Scan
     const securityReports = files.map(f => scanEntrySecurity({ name: f.name, magicBytes: f.magicBytes }));
     setReports(securityReports);
@@ -48,28 +63,36 @@ function App() {
     setLeakReports(leaks.filter(l => l.isFlagged));
 
     setHasScanned(true);
+    if (nameLabel) setFileName(nameLabel);
+  };
+
+  const handleFilesSelected = (files: File[]) => {
+    setPurgedNotice(null);
+    const fileItems: FileEntryItem[] = files.map(f => ({
+      name: f.name,
+      compressedSize: f.size,
+      uncompressedSize: f.size,
+    }));
+    processEntries(fileItems, files.length === 1 ? files[0].name : `${files.length} files archive`);
   };
 
   const handleScanSample = () => {
-    processEntries(SAMPLE_ENTRIES);
-    setFileName('untrusted_incoming_files.zip');
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const fileList = Array.from(files);
-    processEntries(fileList.map(f => ({ name: f.name, compressedSize: f.size, uncompressedSize: f.size })));
-    setFileName(fileList.length === 1 ? fileList[0].name : `${fileList.length} files archive`);
+    setPurgedNotice(null);
+    processEntries(INITIAL_SAMPLE_ENTRIES, 'untrusted_incoming_files.zip');
   };
 
   const handleTriggerBombSample = () => {
-    const bombEntries: ArchiveEntryMeta[] = [
-      { name: 'highly_compressed_payload.bin', compressedSize: 1024, uncompressedSize: 524288000 }, // ~500,000:1 ratio
+    setPurgedNotice(null);
+    const bombEntries: FileEntryItem[] = [
+      { name: 'highly_compressed_payload.bin', compressedSize: 1024, uncompressedSize: 524288000 },
     ];
-    processEntries(bombEntries);
-    setFileName('synthetic_zip_bomb_test.zip');
+    processEntries(bombEntries, 'synthetic_zip_bomb_test.zip');
+  };
+
+  const handleConfirmPurge = (purgedEntryNames: string[]) => {
+    const sanitized = activeEntries.filter(e => !purgedEntryNames.includes(e.name));
+    setPurgedNotice(`Successfully purged ${purgedEntryNames.length} flagged secret file(s). Repack pipeline is sanitized.`);
+    processEntries(sanitized);
   };
 
   return (
@@ -88,48 +111,19 @@ function App() {
 
       <main className="flex-1 max-w-3xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Intake drop zone */}
-        <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 shadow-sm p-6 text-center space-y-4">
-          <div className="inline-flex p-3 rounded-full bg-signal/15 text-signal-dim dark:text-signal">
-            <Upload size={28} />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold">Safe Archive Intake</h2>
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mt-1">
-              Select or drop untrusted archives (ZIP, RAR, 7z, TAR) for client-side security inspection and extraction without server upload.
-            </p>
-          </div>
+        <FileDropZone
+          onFilesSelected={handleFilesSelected}
+          onScanSample={handleScanSample}
+          onTriggerBombSample={handleTriggerBombSample}
+        />
 
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <label className="bg-graphite hover:bg-ink dark:bg-stone dark:hover:bg-gray-300 text-stone dark:text-ink inline-flex items-center justify-center font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 cursor-pointer px-4 py-2 text-sm">
-              <span>Select File</span>
-              <input
-                type="file"
-                className="sr-only"
-                onChange={handleFileChange}
-                accept=".zip,.rar,.7z,.tar,.gz,.bz2,.xz"
-                multiple
-              />
-            </label>
-
-            <button
-              type="button"
-              onClick={handleScanSample}
-              className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/15 dark:hover:bg-gray-800 text-graphite inline-flex items-center gap-1.5 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal px-4 py-2 text-sm"
-            >
-              <RefreshCw size={15} />
-              <span>Load Sample Untrusted Archive</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleTriggerBombSample}
-              className="bg-stone border border-rust/30 hover:bg-rust/10 dark:bg-graphite dark:border-rust/40 text-rust inline-flex items-center gap-1.5 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal px-4 py-2 text-sm"
-            >
-              <ShieldCheck size={15} />
-              <span>Simulate Zip Bomb Test</span>
-            </button>
+        {/* Purge Notice Banner */}
+        {purgedNotice && (
+          <div className="bg-verdigris/10 border border-verdigris/30 rounded-panel p-3.5 text-xs text-graphite dark:text-stone flex items-center gap-2.5">
+            <CheckCircle2 size={18} className="text-verdigris shrink-0" />
+            <span>{purgedNotice}</span>
           </div>
-        </div>
+        )}
 
         {/* Active Session Displays */}
         {hasScanned && (
@@ -156,9 +150,19 @@ function App() {
             {/* Secret Leak Findings Summary */}
             {leakReports.length > 0 && (
               <div className="bg-stone dark:bg-graphite rounded-panel border border-rust/30 p-4 space-y-3 text-xs">
-                <div className="flex items-center gap-2 font-semibold text-rust">
-                  <KeyRound size={16} />
-                  <span>Pre-Flight Secret & Credential Leak Intercept ({leakReports.length} Flagged)</span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 font-semibold text-rust">
+                    <KeyRound size={16} />
+                    <span>Pre-Flight Secret &amp; Credential Leak Intercept ({leakReports.length} Flagged)</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsPurgeModalOpen(true)}
+                    className="bg-rust hover:bg-rust/90 text-white inline-flex items-center gap-1.5 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal px-3 py-1.5 text-xs"
+                  >
+                    <Trash2 size={14} />
+                    <span>Review &amp; Purge Secrets</span>
+                  </button>
                 </div>
                 <ul className="space-y-2 pl-2 border-l-2 border-rust/30">
                   {leakReports.map((leak, idx) => (
@@ -189,6 +193,14 @@ function App() {
           </div>
         )}
       </main>
+
+      {/* Secret Leak Purge Modal */}
+      <PurgeConfirmationModal
+        isOpen={isPurgeModalOpen}
+        onClose={() => setIsPurgeModalOpen(false)}
+        leakReports={leakReports}
+        onConfirmPurge={handleConfirmPurge}
+      />
     </div>
   );
 }

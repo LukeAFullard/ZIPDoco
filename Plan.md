@@ -99,7 +99,7 @@ requirement, not a later optimization.
 
 #### 1.1 Universal Transcoder
 - [ ] **1.1.1 Input Processing & Volume Handling**
-  - [ ] Implement drag-and-drop & File System Access API file loader.
+  - [x] Implement drag-and-drop & File System Access API file loader.
   - [x] Implement multi-volume RAR (`.part1.rar`, `.part2.rar`) detection & volume aggregation prompt.
 - [ ] **1.1.2 Libarchive Streaming Decompressor**
   - [ ] Implement 4MB chunked Wasm input stream feeder into libarchive reader.
@@ -198,9 +198,9 @@ requirement, not a later optimization.
   - [x] Flag high-entropy tokens exceeding threshold (entropy > 4.0 over ≥20 chars).
 - [x] **3.1.3 Secret Token Pattern Matcher**
   - [x] Add regex matchers for AWS keys (`AKIA...`), SSH private keys (`-----BEGIN...KEY-----`), JWTs, API tokens.
-- [ ] **3.1.4 Purge Confirmation & Sanitized Repack**
-  - [ ] Build confirmation modal listing detected secret files/tokens.
-  - [ ] Provide one-click purge action removing flagged secrets from repack output stream.
+- [x] **3.1.4 Purge Confirmation & Sanitized Repack**
+  - [x] Build confirmation modal listing detected secret files/tokens.
+  - [x] Provide one-click purge action removing flagged secrets from repack output stream.
 
 #### 3.2 Batch Consolidator
 - [ ] **3.2.1 Multi-Archive Queue Manager**
