@@ -302,7 +302,7 @@ crossing into extension territory.
 
 ## 5. Suggested Build Order for an Agent
 
-1. [ ] Scaffold PWA shell (manifest, service worker, offline caching) — do this first so every
+1. [x] Scaffold PWA shell (manifest, service worker, offline caching) — do this first so every
    subsequent milestone is testable in an installed, offline context from day one.
 2. [ ] Wasm build pipeline: compile libarchive via Emscripten, verify RAR5 read works on a test
    fixture, before writing any UI.
