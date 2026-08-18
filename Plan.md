@@ -22,19 +22,18 @@ at runtime; all processing happens in-browser via WebAssembly and Web Workers.
 
 | Layer | Choice | Why |
 |---|---|---|
-| Archive reading | **libarchive** compiled to Wasm via Emscripten | BSD-licensed, no use restrictions (unlike RARLAB's `unrar`, which forbids building a compressor and carries other non-free clauses). Natively supports RAR4 **and** RAR5, 7z, TAR, GZ, BZ2, XZ. |
+| Archive reading | **libarchive** compiled to Wasm via Emscripten | BSD-licensed, no use restrictions. Natively supports RAR4 **and** RAR5, 7z, TAR, GZ, BZ2, XZ. |
 | ZIP writing | **fflate** (streaming, Worker-friendly) | Lightweight, no main-thread blocking, good compression ratio/speed tradeoff. |
 | Concurrency | Web Worker pool (4–8 workers, `navigator.hardwareConcurrency` bound) | Keeps UI thread responsive during scan/extract/repack. |
 | Large-file storage | **Origin Private File System (OPFS)** + **File System Access API** | Enables multi-GB streaming without holding full archive in memory. |
-| Memory model | Wasm32 (4 GB linear memory ceiling), **not** Memory64 | Memory64 origin-trial/partial support as of 2026 is not reliable enough to depend on; stream chunks through a bounded working set instead of raising the ceiling. |
+| Memory model | Wasm32 (4 GB linear memory ceiling), **not** Memory64 | Stream chunks through a bounded working set instead of raising the ceiling. |
 | App shell | PWA: Service Worker + Web App Manifest | Offline capability, installability. |
-| OS integration | **File Handling API** (register as `.zip/.rar/.7z/.tar.gz` handler) + **Web Share Target API** | Gets "open with" / "share to" behavior without an extension. |
+| OS integration | **File Handling API** + **Web Share Target API** | Gets "open with" / "share to" behavior without an extension. |
 
 ### Critical architectural constraint
 **Never hold the full archive or its full extracted contents in Wasm linear memory.**
 All read/write operations must be chunked and streamed through OPFS. This is a Milestone 1
-requirement, not a later optimization — retrofitting it after M2/M3 features are built on
-top of an in-memory model would require a rewrite.
+requirement, not a later optimization.
 
 ---
 
@@ -74,241 +73,208 @@ top of an in-memory model would require a rewrite.
 
 ---
 
-## Milestone 1 — Core MVP & Security Shields
+## 4. Granular Phase Breakdown (Smaller Chunks)
 
-**Goal:** A working, safe, installable PWA that can open and convert archives. This is the
-part that must ship correctly before anything else is layered on.
-
-### 1.1 Universal Transcoder
-- [ ] Input: drag-and-drop or File Handling API launch of `.rar`, `.7z`, `.tar`, `.tar.gz`,
-  `.tar.bz2`, `.tar.xz`.
-- [ ] Output: standard `.zip`, optionally AES-256 encrypted (via a Wasm AES implementation
-  applied to the fflate output stream — do not implement crypto by hand).
-- [ ] Multi-volume RAR (`.part1.rar`, `.part2.rar`, ...) is **out of scope for auto-detection**
-  in M1: detect the pattern, show a clear message asking the user to select all volumes,
-  and merge them into a single logical stream before handing to libarchive. Do not silently
-  fail on volume 1 only.
-- [ ] Acceptance criteria:
-  - [ ] Successfully round-trips a 2GB test archive without exceeding ~200MB peak JS heap
-    (verify via Performance/Memory panel in automated test).
-  - [ ] Output zip opens correctly in native OS tools (macOS Archive Utility, Windows Explorer,
-    7-Zip).
-
-### 1.2 Zip Bomb Defense
-- [ ] **Pre-flight check** (runs before any full decompression):
-  - [ ] Read archive central directory / header only.
-  - [ ] Compute `expansion_ratio = sum(uncompressed_size) / sum(compressed_size)` across all
-    entries.
-  - [ ] **Trigger threshold: >100:1** → block automatic extraction, show warning with the
-    actual ratio, require explicit user confirmation to proceed, and if they proceed,
-    extract one entry at a time with the circuit breaker below active.
-  - [ ] Also check **nested archives**: if an entry inside the archive is itself an archive
-    format (by magic bytes, not just extension), recurse the same ratio check into it
-    before allowing extraction — this closes the "matryoshka bomb" evasion where a single
-    outer archive looks safe but contains a bomb one level down.
-- [ ] **Worker memory circuit breaker** (runtime safety net, independent of pre-flight):
-  - [ ] Each extraction Worker tracks cumulative bytes written to OPFS during a single
-    operation.
-  - [ ] Hard cap (configurable, default 10GB per session) — if exceeded, abort the operation,
-    discard partial output, surface an error.
-- [ ] Acceptance criteria: a synthetic 42.zip-style test bomb is caught at pre-flight and never
-  reaches full decompression.
-
-### 1.3 Zip Slip Neutralizer
-- [ ] For every entry path extracted from any archive format:
-  - [ ] Strip leading `/` or drive letters (`C:\`).
-  - [ ] Resolve `..` segments; if resolution would place the target outside the extraction
-    root, **reject that entry** (do not silently clamp it — log it as blocked and show the
-    user a count of blocked entries).
-  - [ ] Reject symlink entries (common in TAR) whose target resolves outside the extraction
-    root, using the same resolution logic.
-- [ ] Implement as a single shared sanitizer function used by every extraction code path (not
-  duplicated per format) — this function is a natural unit-test target: write ~15 test
-  cases covering `../`, absolute paths, symlink targets, and mixed separators.
-
-### 1.4 OS Junk Stripper
-- [ ] One-click toggle, on by default, that filters these from extraction output:
-  `__MACOSX/`, `.DS_Store`, `Thumbs.db`, `desktop.ini`.
-- [ ] Apply the filter at the listing stage (so junk files don't even appear in the file tree)
-  as well as at extraction time.
-
-### M1 exit criteria
-- [ ] All four features above pass acceptance criteria.
-- [ ] PWA is installable (manifest + service worker validated via Lighthouse PWA audit, target
-  score ≥90).
-- [ ] No feature requires network access at runtime; verify by testing with DevTools "offline"
-  mode after first load.
+### Phase 0: Project & Infrastructure Foundation
+- [x] **0.1 PWA Shell Scaffolding**
+  - [x] Configure Vite PWA plugin & Web App Manifest (`manifest.webmanifest`).
+  - [x] Implement offline Service Worker strategy for app shell assets.
+  - [x] Add timeDoco design tokens & basic UI layout frame in React.
+- [ ] **0.2 Wasm Build Pipeline Setup**
+  - [ ] Configure Emscripten build script for `libarchive.wasm` targeting Wasm32.
+  - [ ] Implement Emscripten glue module wrapper exporting modular `createLibarchiveModule`.
+  - [ ] Verify basic archive read capability against a RAR5 test fixture.
+- [ ] **0.3 OPFS Working Storage Layer**
+  - [ ] Create OPFS session file manager (`src/lib/storage/opfs.ts`).
+  - [ ] Implement 4MB chunked stream reader/writer utilities for OPFS files.
+  - [ ] Implement session directory cleanup lifecycle (`beforeunload`, `visibilitychange`, 24h purge routine).
+- [ ] **0.4 Web Worker Pool Architecture**
+  - [ ] Create Worker Pool Coordinator (`src/lib/workers/pool.ts`) with `navigator.hardwareConcurrency` auto-scaling.
+  - [ ] Establish typed RPC `postMessage` protocol between main thread and workers.
+  - [ ] Implement Worker error isolation & try/catch bounds to prevent main thread crashes.
 
 ---
 
-## Milestone 2 — Inspection, Safety & File Polish
+### Milestone 1 — Core MVP & Security Shields
 
-**Goal:** Make the tool safe and useful to actually look inside an archive before trusting
-it — this is where the "intake" positioning becomes real, not just marketing copy.
+#### 1.1 Universal Transcoder
+- [ ] **1.1.1 Input Processing & Volume Handling**
+  - [ ] Implement drag-and-drop & File System Access API file loader.
+  - [ ] Implement multi-volume RAR (`.part1.rar`, `.part2.rar`) detection & volume aggregation prompt.
+- [ ] **1.1.2 Libarchive Streaming Decompressor**
+  - [ ] Implement 4MB chunked Wasm input stream feeder into libarchive reader.
+  - [ ] Extract file entries iteratively to OPFS scratch storage without staging full files in linear memory.
+- [ ] **1.1.3 Streaming Repacker & AES Encryption**
+  - [ ] Integrate `fflate` streaming ZIP writer in a dedicated background worker.
+  - [ ] Add optional AES-256 encryption layer for repack output stream.
+- [ ] **1.1.4 Transcoder Acceptance & Memory Verification**
+  - [ ] Verify 2GB test archive round-trip with <200MB peak JS heap.
+  - [ ] Validate output ZIP compatibility with native OS archive tools (macOS, Windows Explorer, 7-Zip).
 
-### 2.1 Zero-Extract Quick Look
-- [ ] Preview without writing to disk: text, Markdown (rendered), CSV (as table), images
-  (png/jpg/gif/webp), PDF (via a Wasm PDF renderer, e.g. pdf.js).
-- [ ] **Syntax-highlighted code preview** for common source extensions (`.py`, `.js`, `.ts`,
-  `.tsx`, `.go`, `.rs`, `.java`, etc.) using a lightweight highlighter (e.g. Prism, loaded
-  lazily).
-- [ ] Preview reads only the bytes needed for the single entry being viewed (seek within the
-  Wasm-decompressed stream), not the whole archive.
+#### 1.2 Zip Bomb Defense
+- [ ] **1.2.1 Pre-Flight Header Ratio Calculator**
+  - [ ] Parse archive central directory / header headers before decompressing file contents.
+  - [ ] Calculate global expansion ratio `sum(uncompressed_size) / sum(compressed_size)`.
+- [ ] **1.2.2 Threshold Trigger & User Intercept UI**
+  - [ ] Implement >100:1 ratio warning UI block requiring explicit user override.
+  - [ ] Enable single-entry sequential extraction fallback when override is granted.
+- [ ] **1.2.3 Nested Archive Matryoshka Scanner**
+  - [ ] Detect nested archive formats via magic-byte inspection on inner entry headers.
+  - [ ] Recurse expansion ratio check into nested archive entries before extraction.
+- [ ] **1.2.4 Worker Memory Circuit Breaker**
+  - [ ] Track cumulative bytes written to OPFS during decompression inside worker state.
+  - [ ] Hard-abort extraction job & discard partial OPFS output if configurable threshold (10GB) is reached.
+- [ ] **1.2.5 Synthetic Bomb Test Suite**
+  - [ ] Add automated test fixture for synthetic zip bombs (e.g. 42.zip) verifying pre-flight intercept.
 
-### 2.2 Selective Extraction
-- [ ] Interactive file tree (virtualized rendering for archives with 10k+ entries — do not
-  render the full DOM tree eagerly).
-- [ ] Checkbox selection at file or folder granularity; "Extract selected" streams only the
-  chosen entries to OPFS / triggers browser download.
+#### 1.3 Zip Slip Neutralizer
+- [ ] **1.3.1 Path Sanitizer Core**
+  - [ ] Implement unified `sanitizePath(path: string)` function stripping leading slashes and drive letters (`C:\`).
+  - [ ] Resolve relative `..` directory traversal segments.
+- [ ] **1.3.2 Containment Enforcement & Symlink Validator**
+  - [ ] Reject entries resolving outside extraction root directory and log blocked entry counts.
+  - [ ] Validate TAR symlink targets to block symlinks resolving outside extraction root.
+- [ ] **1.3.3 Sanitizer Unit Test Suite**
+  - [ ] Create unit tests covering 15+ malicious path vectors (`../`, absolute paths, mixed slashes, symlinks).
 
-### 2.3 Mojibake Repair
-- [ ] Auto-detect legacy encodings in filenames and text content: Shift-JIS, GBK, Windows-1252.
-- [ ] Use a charset-detection library (e.g. a Wasm port of `uchardet` or `chardet`-equivalent)
-  run against filename byte sequences and text file contents.
-- [ ] Normalize to UTF-8 on extraction; show a before/after diff of renamed files so the user
-  can confirm rather than being surprised.
-
-### 2.4 Spoofer Shield
-- [ ] Detect Right-to-Left Override character (`\u202E`) and other Unicode bidi-control
-  characters in filenames — flag any entry where the override changes the apparent file
-  extension.
-- [ ] Verify true file type via magic-byte sniffing (first N bytes) against the claimed
-  extension for every entry; flag mismatches (e.g. a `.pdf` that's actually a PE
-  executable).
-- [ ] **Disguised-executable detection** (extends Spoofer Shield): flag double extensions
-  (`invoice.pdf.exe`), and specifically call out `.lnk`, `.hta`, `.scr` regardless of
-  magic-byte result, since these are common social-engineering vectors independent of
-  content.
-- [ ] Surface all flags in a single "Safety" panel per archive, not scattered inline — this
-  becomes the seed of the audit report in M3.
-
-### M2 exit criteria
-- [ ] Quick Look renders all listed formats without extraction-to-disk (verify via OPFS write
-  count = 0 during preview-only session).
-- [ ] Spoofer Shield correctly flags a test set of RTLO-renamed and magic-byte-mismatched fixtures.
-
----
-
-## Milestone 3 — Batch Workflows & Integrity (the differentiation layer)
-
-**Goal:** This is the milestone that actually separates the product from the ~6+ existing
-"free client-side unzip" tools already in market. Prioritize accordingly.
-
-### 3.1 Pre-Flight Leak Scanner (promoted from original M3 — highest-priority feature here)
-- [ ] **Filename-based pass:** flag `.env`, `.pem`, `.key`, `id_rsa*`, `.git/`, `credentials*`,
-  `*_rsa`, cloud provider credential file patterns (`.aws/credentials`, etc.).
-- [ ] **Content-based pass** (the actual differentiator — do not ship filename-only):
-  - [ ] Run a Shannon-entropy check on string tokens extracted from text-like files; flag
-    high-entropy strings above a length/entropy threshold (tunable, start with entropy >
-    4.0 bits/char over ≥20 chars).
-  - [ ] Pattern-match known secret formats: AWS access keys (`AKIA[0-9A-Z]{16}`), private key
-    PEM headers (`-----BEGIN...PRIVATE KEY-----`), generic JWT structure, Slack/Stripe/etc.
-    token prefixes.
-  - [ ] This catches secrets in files renamed to avoid filename detection (e.g. `secrets.env`
-    → `notes.txt`).
-- [ ] One-click purge: removes flagged entries from the repack output; always show a
-  confirmation list before purging (never silent-delete).
-
-### 3.2 Batch Consolidator
-- [ ] Accept multiple archives in one drop.
-- [ ] "Unzip All" → isolated output folder per archive (named after source archive, collision-
-  safe).
-- [ ] "Merge All" → single deduplicated master ZIP; dedupe by content hash (SHA-256 of file
-  bytes), not just filename, so identical files under different names are still deduped.
-- [ ] Both modes run through the same Junk Stripper / Zip Slip / Zip Bomb pipeline per archive
-  — no shortcuts for batch mode.
-
-### 3.3 Archive Diff
-- [ ] Dual-pane comparison between two archives: added / removed / modified / size-delta,
-  keyed by normalized path.
-- [ ] **Line-level diff for text/code files specifically** (not just "modified" flag) — reuse
-  the syntax-highlighted preview component from 2.1, rendered in a two-column diff view
-  (a simple LCS-based diff algorithm run client-side is sufficient; no need for a Wasm
-  diff library at this scale).
-
-### 3.4 Exportable Audit Report
-- [ ] After running Leak Scanner + Spoofer Shield + Zip Bomb/Slip checks on an archive,
-  generate a single report: file count, flagged items with reasons, SHA-256 manifest of
-  all entries, encoding issues found.
-- [ ] Export as JSON (machine-readable) and PDF (human-readable, for attaching to a ticket).
-- [ ] This is the natural seed of a future paid/team tier — scope the data model with that in
-  mind (structured JSON schema, versioned) even though monetization isn't in this plan.
-
-### M3 exit criteria
-- [ ] Content-based secret scan catches a renamed-extension test fixture that filename-only
-  scanning would miss.
-- [ ] Merge-all dedup correctly collapses byte-identical files across ≥3 source archives with
-  different filenames.
+#### 1.4 OS Junk Stripper
+- [ ] **1.4.1 Junk Path Matcher Module**
+  - [ ] Implement pattern matcher for OS clutter: `__MACOSX/`, `.DS_Store`, `Thumbs.db`, `desktop.ini`.
+- [ ] **1.4.2 Stage Integrations & UI Toggle**
+  - [ ] Integrate filter into archive listing stage (hiding junk entries from UI tree).
+  - [ ] Integrate filter into extraction/repack pipeline with user toggle (default ON).
 
 ---
 
-## Milestone 4 — PWA-Native Differentiation
+### Milestone 2 — Inspection, Safety & File Polish
 
-**Goal:** Features that lean into being an installed PWA rather than a website, without
-crossing into extension territory.
+#### 2.1 Zero-Extract Quick Look
+- [ ] **2.1.1 Entry Seek & Byte Streamer**
+  - [ ] Implement targeted byte-range extraction for single entries directly from Wasm decompressor.
+- [ ] **2.1.2 Text, Markdown, CSV, and Image Renderers**
+  - [ ] Build plain text, Markdown previewer, and CSV table view component.
+  - [ ] Build image preview modal (`png`, `jpg`, `gif`, `webp`).
+- [ ] **2.1.3 Syntax Highlighting Component**
+  - [ ] Integrate lightweight syntax highlighter (Prism/Shiki lazy-loaded) for source files (`.py`, `.js`, `.ts`, `.go`, `.rs`, `.java`).
+- [ ] **2.1.4 Wasm PDF Renderer Integration**
+  - [ ] Integrate pdf.js / Wasm PDF renderer for in-browser PDF previews.
 
-### 4.1 File Handling API Registration
-- [ ] Register `.zip`, `.rar`, `.7z`, `.tar.gz` in the Web App Manifest `file_handlers` field
-  so the installed PWA appears in the OS "Open with" menu.
-- [ ] Verify behavior on Chromium desktop (primary support target); note in docs that Safari/
-  Firefox support is partial/absent as of 2026 and the app must still work as a normal tab
-  for those browsers.
+#### 2.2 Selective Extraction
+- [ ] **2.2.1 Virtualized File Tree Component**
+  - [ ] Build high-performance virtualized file tree UI handling 10,000+ archive entries.
+- [ ] **2.2.2 Granular Selection State & Download Trigger**
+  - [ ] Add checkbox selection state at file and directory levels.
+  - [ ] Connect "Extract Selected" action to stream chosen files directly to OPFS / browser download.
 
-### 4.2 Web Share Target API
-- [ ] Register as a share target so files can be shared directly into the app from other apps
-  on Android and supporting desktop contexts, without needing an extension.
+#### 2.3 Mojibake Repair
+- [ ] **2.3.1 Character Set Detector Integration**
+  - [ ] Integrate character encoding detector (Shift-JIS, GBK, Windows-1252 detection).
+- [ ] **2.3.2 Filename & Text Normalization**
+  - [ ] Implement UTF-8 string conversion for detected non-UTF8 filename byte sequences.
+- [ ] **2.3.3 Before/After Diff Confirmation UI**
+  - [ ] Build interactive diff UI displaying original vs repaired filenames before user confirmation.
 
-### 4.3 Thumbnail Grid View
-- [ ] For archives detected as image/video-heavy (heuristic: >50% of entries match image
-  extensions), offer a grid view instead of the file tree.
-- [ ] Generate thumbnails client-side (canvas-based downscale) with lazy loading /
-  virtualization — do not decode every image eagerly for a large archive.
-- [ ] Format-aware detection extends this: recognize comic archives (CBR/CBZ) specifically and
-  default to a reader-style paginated view rather than a grid.
-
-### 4.4 Full-Text Search Inside Archive
-- [ ] Index text-like file contents (respecting a reasonable size cap per file, e.g. skip files
-  >5MB from indexing to avoid pathological cases) into an in-memory search structure
-  (simple inverted index is sufficient at this scale — no need for a full search library).
-- [ ] Search runs against the index without extracting files to disk; clicking a result opens
-  Quick Look at the matching file/line.
-
-### M4 exit criteria
-- [ ] File Handling registration verified working end-to-end on Chromium (double-click a
-  `.zip` in OS file manager launches the installed PWA with that file loaded).
-- [ ] Full-text search returns results in <500ms for a 500-file archive on a mid-range laptop.
-
----
-
-## 4. Cross-Cutting Engineering Requirements (apply to every milestone)
-
-- [ ] **Testing:** every sanitizer/security function (Zip Slip, Zip Bomb ratio check, magic-
-  byte verification, secret pattern matching) needs a dedicated unit test suite with known-
-  malicious fixtures, run in CI before merge — these are the functions where a regression
-  is a security incident, not a bug.
-- [ ] **No feature may introduce a network call.** Add a CI check (e.g. a test that runs the
-  app fully offline and fails the build if any `fetch`/`XMLHttpRequest` fires) to enforce
-  the zero-network promise structurally, not just by convention.
-- [ ] **Worker error isolation:** a crash or exception in one Worker (e.g. a malformed archive
-  triggering a libarchive parse error) must not crash the main thread or other in-flight
-  Worker jobs — wrap all Worker message handlers in try/catch and report structured errors
-  back to the UI.
-- [ ] **OPFS cleanup:** scratch space under `/incoming/{session-id}/` must be deleted when a
-  session ends (tab close, or explicit "start over") — add a cleanup routine on
-  `visibilitychange`/`beforeunload` as a best-effort, plus a startup routine that purges
-  orphaned session directories older than 24 hours.
+#### 2.4 Spoofer Shield
+- [ ] **2.4.1 Bidi & RTLO Character Detector**
+  - [ ] Flag filenames containing Right-to-Left Override (`\u202E`) and Unicode bidi control characters.
+- [ ] **2.4.2 Magic-Byte Format Validator**
+  - [ ] Implement file header magic-byte sniffing (first 512 bytes) and compare against extension claims.
+  - [ ] Flag mismatch anomalies (e.g. executable disguised as PDF).
+- [ ] **2.4.3 Disguised Executable & Risky Extension Scanner**
+  - [ ] Detect double extensions (`invoice.pdf.exe`).
+  - [ ] Flag high-risk social engineering file extensions (`.lnk`, `.hta`, `.scr`, `.exe`, `.bat`).
+- [ ] **2.4.4 Safety Summary Panel**
+  - [ ] Create consolidated "Safety Inspection" UI panel summarizing all detected security warnings.
 
 ---
 
-## 5. Suggested Build Order for an Agent
+### Milestone 3 — Batch Workflows & Integrity
 
-1. [x] Scaffold PWA shell (manifest, service worker, offline caching) — do this first so every
-   subsequent milestone is testable in an installed, offline context from day one.
-2. [ ] Wasm build pipeline: compile libarchive via Emscripten, verify RAR5 read works on a test
-   fixture, before writing any UI.
-3. [ ] OPFS + Worker pool plumbing with the chunked-streaming model — build and load-test this
-   against a large (5GB+) synthetic file *before* building M1 UI on top of it, since this is
-   the highest-risk architectural assumption in the whole plan.
-4. [ ] M1 features in the order listed (Transcoder → Zip Bomb → Zip Slip → Junk Stripper).
-5. [ ] M2, M3, M4 in order, but M3.1 (Leak Scanner) can be pulled forward ahead of 2.3/2.4 if
-   the agent is working in parallel tracks — it has no dependency on Mojibake/Spoofer work.
+#### 3.1 Pre-Flight Leak Scanner
+- [ ] **3.1.1 Filename Credential Pattern Matching**
+  - [ ] Scan entry names against sensitive patterns (`.env`, `.pem`, `.key`, `id_rsa`, `.git/`, `credentials*`, `.aws/`).
+- [ ] **3.1.2 Content Shannon Entropy Analyzer**
+  - [ ] Calculate Shannon entropy on string tokens extracted from text files.
+  - [ ] Flag high-entropy tokens exceeding threshold (entropy > 4.0 over ≥20 chars).
+- [ ] **3.1.3 Secret Token Pattern Matcher**
+  - [ ] Add regex matchers for AWS keys (`AKIA...`), SSH private keys (`-----BEGIN...KEY-----`), JWTs, API tokens.
+- [ ] **3.1.4 Purge Confirmation & Sanitized Repack**
+  - [ ] Build confirmation modal listing detected secret files/tokens.
+  - [ ] Provide one-click purge action removing flagged secrets from repack output stream.
+
+#### 3.2 Batch Consolidator
+- [ ] **3.2.1 Multi-Archive Queue Manager**
+  - [ ] Support multi-file drag-and-drop batch queueing.
+- [ ] **3.2.2 Isolated Batch Extraction ("Unzip All")**
+  - [ ] Extract multiple archives into isolated, collision-safe OPFS folders.
+- [ ] **3.2.3 Content-Deduplicated Master Repack ("Merge All")**
+  - [ ] Calculate SHA-256 hashes of entry byte streams.
+  - [ ] Build master ZIP writer skipping duplicate file byte streams regardless of original path names.
+
+#### 3.3 Archive Diff
+- [ ] **3.3.1 Dual-Pane Tree Comparison Engine**
+  - [ ] Compare two archives side-by-side to detect added, removed, modified, and identical files.
+- [ ] **3.3.2 Two-Column Line-Level Text Diff**
+  - [ ] Implement client-side LCS text diffing algorithm for modified code/text files.
+  - [ ] Render two-column highlighted text diff view.
+
+#### 3.4 Exportable Audit Report
+- [ ] **3.4.1 Audit Summary Data Schema**
+  - [ ] Define versioned JSON schema capturing file counts, safety flags, entropy findings, SHA-256 manifests.
+- [ ] **3.4.2 JSON & Human-Readable PDF Exporters**
+  - [ ] Add machine-readable `.json` audit report exporter.
+  - [ ] Add styled printable `.pdf` audit report generator.
+
+---
+
+### Milestone 4 — PWA-Native Differentiation
+
+#### 4.1 File Handling API Registration
+- [ ] **4.1.1 Manifest Registration**
+  - [ ] Register file handlers in `manifest.webmanifest` for `.zip`, `.rar`, `.7z`, `.tar.gz`.
+- [ ] **4.1.2 Chromium OS Integration Handler**
+  - [ ] Wire `launchQueue.setConsumer()` in `main.tsx` to handle direct OS file double-click launches.
+
+#### 4.2 Web Share Target API
+- [ ] **4.2.1 Share Target Manifest Configuration**
+  - [ ] Configure `share_target` field in web manifest for receiving shared files.
+- [ ] **4.2.2 Service Worker Share Payload Handler**
+  - [ ] Add Service Worker `fetch` intercept for incoming share POST data and pass file handles to UI.
+
+#### 4.3 Thumbnail Grid & Comic Reader View
+- [ ] **4.3.1 Lazy Canvas Thumbnail Generator**
+  - [ ] Detect image-heavy archives (>50% image entries) and render virtualized thumbnail grid.
+  - [ ] Generate low-res image thumbnails on demand using HTML Canvas downscaling.
+- [ ] **4.3.2 Comic Archive Reader (CBR/CBZ)**
+  - [ ] Recognize CBR/CBZ extensions and provide paginated reader interface.
+
+#### 4.4 Full-Text Search Inside Archive
+- [ ] **4.4.1 Client-Side Inverted Text Indexer**
+  - [ ] Index text content of files (<5MB) into an in-memory inverted index without disk extraction.
+- [ ] **4.4.2 Instant Search UI & Quick Look Jump**
+  - [ ] Provide instant search input returning matching entries and line occurrences in <500ms.
+  - [ ] Connect search results directly to Quick Look preview.
+
+---
+
+## 5. Cross-Cutting Engineering Requirements
+
+- [ ] **Dedicated Security Test Suite:** CI automated tests for Zip Slip, Zip Bomb, Magic Bytes, Bidi/RTLO, and Secret Scan matchers.
+- [ ] **Strict Zero-Network CI Enforcer:** CI test verifying zero network calls (`fetch`/`XHR`) fire during runtime operation.
+- [ ] **Worker Error Isolation Wrapper:** Ensure all worker task handlers catch errors and report structured messages without main thread crashes.
+- [ ] **OPFS Garbage Collector:** Automated cleanup routine on session end and 24h stale directory purge on app boot.
+
+---
+
+## 6. Granular Phased Execution Order
+
+1. **Phase 0.1 – 0.4:** Infrastructure setup (PWA shell, Emscripten Wasm build, OPFS storage, Web Worker pool).
+2. **Phase 1.3:** Zip Slip sanitizer module & test suite (critical security primitive built first).
+3. **Phase 1.2:** Zip Bomb pre-flight ratio scanner & memory circuit breaker.
+4. **Phase 1.1:** Universal Transcoder (libarchive streaming reader + fflate streaming writer + AES layer).
+5. **Phase 1.4:** OS Junk Stripper path matcher & filter integration.
+6. **Phase 2.4:** Spoofer Shield (RTLO detection, magic-byte sniffing, disguised executable detection).
+7. **Phase 3.1:** Pre-flight Leak Scanner (filename credentials, Shannon entropy analyzer, secret regex patterns).
+8. **Phase 2.1 – 2.3:** Quick Look renderers, selective extraction UI tree, Mojibake repair tool.
+9. **Phase 3.2 – 3.4:** Batch Consolidator, Archive Diff tool, Audit Report exporter.
+10. **Phase 4.1 – 4.4:** File Handling API, Web Share Target, Thumbnail/Comic view, Full-Text search.
