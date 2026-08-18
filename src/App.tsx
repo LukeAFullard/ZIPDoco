@@ -1,26 +1,57 @@
 import React, { useState } from 'react';
-import { Archive, ShieldCheck, Upload, RefreshCw } from 'lucide-react';
+import { Archive, ShieldCheck, Upload, RefreshCw, KeyRound, Layers } from 'lucide-react';
 import { SafetySummaryPanel } from './components/SafetySummaryPanel';
+import { ZipBombWarningPanel } from './components/ZipBombWarningPanel';
 import { scanEntrySecurity, type EntrySecurityReport } from './lib/security/spooferShield';
+import { checkZipBombThreshold, type ZipBombCheckResult, type ArchiveEntryMeta } from './lib/security/zipBomb';
+import { aggregateVolumeSet, type MultiVolumeSetReport } from './lib/transcoder/volumeDetector';
+import { scanEntryLeaks, type EntryLeakReport } from './lib/security/leakScanner';
 
-const SAMPLE_ENTRIES = [
-  { name: 'document_v2.pdf' },
-  { name: 'financial_report.pdf', magicBytes: new Uint8Array([0x4d, 0x5a, 0x90, 0x00]) }, // PE Executable disguised as PDF!
-  { name: 'invoice_2025.pdf.exe' }, // Double extension
-  { name: 'tax_return_\u202Egpj.exe' }, // RTLO bidi spoof
-  { name: 'project_notes.txt' },
-  { name: 'company_logo.png' },
+const SAMPLE_ENTRIES: ArchiveEntryMeta[] = [
+  { name: 'document_v2.pdf', compressedSize: 150000, uncompressedSize: 200000 },
+  { name: 'financial_report.pdf', compressedSize: 100000, uncompressedSize: 120000, magicBytes: new Uint8Array([0x4d, 0x5a, 0x90, 0x00]) }, // PE Executable disguised as PDF!
+  { name: 'invoice_2025.pdf.exe', compressedSize: 50000, uncompressedSize: 80000 }, // Double extension
+  { name: 'tax_return_\u202Egpj.exe', compressedSize: 40000, uncompressedSize: 60000 }, // RTLO bidi spoof
+  { name: 'config/.env', compressedSize: 200, uncompressedSize: 1500 }, // Credential file
+  { name: 'keys/id_rsa', compressedSize: 800, uncompressedSize: 3200 }, // Private key
 ];
 
 function App() {
   const [reports, setReports] = useState<EntrySecurityReport[]>([]);
+  const [zipBombResult, setZipBombResult] = useState<ZipBombCheckResult | null>(null);
+  const [volumeReport, setVolumeReport] = useState<MultiVolumeSetReport | null>(null);
+  const [leakReports, setLeakReports] = useState<EntryLeakReport[]>([]);
   const [hasScanned, setHasScanned] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
 
-  const handleScanSample = () => {
-    const scanned = SAMPLE_ENTRIES.map(e => scanEntrySecurity(e));
-    setReports(scanned);
+  const processEntries = (files: Array<{ name: string; compressedSize?: number; uncompressedSize?: number; magicBytes?: Uint8Array }>) => {
+    // 1. Spoofer Shield Scan
+    const securityReports = files.map(f => scanEntrySecurity({ name: f.name, magicBytes: f.magicBytes }));
+    setReports(securityReports);
+
+    // 2. Zip Bomb Pre-Flight Check
+    const entriesMeta: ArchiveEntryMeta[] = files.map(f => ({
+      name: f.name,
+      compressedSize: f.compressedSize ?? 1000,
+      uncompressedSize: f.uncompressedSize ?? 1000,
+      magicBytes: f.magicBytes,
+    }));
+    const bombCheck = checkZipBombThreshold(entriesMeta, { maxRatio: 100 });
+    setZipBombResult(bombCheck);
+
+    // 3. Multi-Volume Set Scan
+    const volumeCheck = aggregateVolumeSet(files.map(f => ({ name: f.name })));
+    setVolumeReport(volumeCheck);
+
+    // 4. Pre-Flight Secret Leak Scan
+    const leaks = files.map(f => scanEntryLeaks(f.name));
+    setLeakReports(leaks.filter(l => l.isFlagged));
+
     setHasScanned(true);
+  };
+
+  const handleScanSample = () => {
+    processEntries(SAMPLE_ENTRIES);
     setFileName('untrusted_incoming_files.zip');
   };
 
@@ -29,10 +60,16 @@ function App() {
     if (!files || files.length === 0) return;
 
     const fileList = Array.from(files);
-    const scanned = fileList.map(f => scanEntrySecurity({ name: f.name }));
-    setReports(scanned);
-    setHasScanned(true);
+    processEntries(fileList.map(f => ({ name: f.name, compressedSize: f.size, uncompressedSize: f.size })));
     setFileName(fileList.length === 1 ? fileList[0].name : `${fileList.length} files archive`);
+  };
+
+  const handleTriggerBombSample = () => {
+    const bombEntries: ArchiveEntryMeta[] = [
+      { name: 'highly_compressed_payload.bin', compressedSize: 1024, uncompressedSize: 524288000 }, // ~500,000:1 ratio
+    ];
+    processEntries(bombEntries);
+    setFileName('synthetic_zip_bomb_test.zip');
   };
 
   return (
@@ -70,6 +107,7 @@ function App() {
                 className="sr-only"
                 onChange={handleFileChange}
                 accept=".zip,.rar,.7z,.tar,.gz,.bz2,.xz"
+                multiple
               />
             </label>
 
@@ -81,16 +119,63 @@ function App() {
               <RefreshCw size={15} />
               <span>Load Sample Untrusted Archive</span>
             </button>
+
+            <button
+              type="button"
+              onClick={handleTriggerBombSample}
+              className="bg-stone border border-rust/30 hover:bg-rust/10 dark:bg-graphite dark:border-rust/40 text-rust inline-flex items-center gap-1.5 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal px-4 py-2 text-sm"
+            >
+              <ShieldCheck size={15} />
+              <span>Simulate Zip Bomb Test</span>
+            </button>
           </div>
         </div>
 
-        {/* Security Inspection Panel */}
+        {/* Active Session Displays */}
         {hasScanned && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 font-mono">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 font-mono border-b border-graphite/10 dark:border-white/10 pb-2">
               <span>ACTIVE SESSION: {fileName}</span>
               <span>{reports.length} ENTRIES</span>
             </div>
+
+            {/* Zip Bomb Warning Panel */}
+            {zipBombResult && <ZipBombWarningPanel checkResult={zipBombResult} />}
+
+            {/* Multi-Volume Report */}
+            {volumeReport && volumeReport.isMultiVolumeSet && (
+              <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 p-4 space-y-2 text-xs">
+                <div className="flex items-center gap-2 font-semibold text-graphite dark:text-stone">
+                  <Layers size={16} className="text-signal-dim dark:text-signal" />
+                  <span>Multi-Volume Archive Set ({volumeReport.format?.toUpperCase()})</span>
+                </div>
+                <p className="text-gray-600 dark:text-gray-300">{volumeReport.promptMessage}</p>
+              </div>
+            )}
+
+            {/* Secret Leak Findings Summary */}
+            {leakReports.length > 0 && (
+              <div className="bg-stone dark:bg-graphite rounded-panel border border-rust/30 p-4 space-y-3 text-xs">
+                <div className="flex items-center gap-2 font-semibold text-rust">
+                  <KeyRound size={16} />
+                  <span>Pre-Flight Secret & Credential Leak Intercept ({leakReports.length} Flagged)</span>
+                </div>
+                <ul className="space-y-2 pl-2 border-l-2 border-rust/30">
+                  {leakReports.map((leak, idx) => (
+                    <li key={idx} className="space-y-0.5">
+                      <span className="font-mono font-medium text-graphite dark:text-stone">{leak.entryName}</span>
+                      {leak.filenameLeaks.map((f, fIdx) => (
+                        <p key={fIdx} className="text-rust text-[11px]">
+                          • {f.description}
+                        </p>
+                      ))}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Safety & Spoofer Summary Panel */}
             <SafetySummaryPanel reports={reports} />
           </div>
         )}
