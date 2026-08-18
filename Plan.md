@@ -84,10 +84,10 @@ requirement, not a later optimization.
   - [ ] Configure Emscripten build script for `libarchive.wasm` targeting Wasm32.
   - [ ] Implement Emscripten glue module wrapper exporting modular `createLibarchiveModule`.
   - [ ] Verify basic archive read capability against a RAR5 test fixture.
-- [ ] **0.3 OPFS Working Storage Layer**
-  - [ ] Create OPFS session file manager (`src/lib/storage/opfs.ts`).
-  - [ ] Implement 4MB chunked stream reader/writer utilities for OPFS files.
-  - [ ] Implement session directory cleanup lifecycle (`beforeunload`, `visibilitychange`, 24h purge routine).
+- [x] **0.3 OPFS Working Storage Layer**
+  - [x] Create OPFS session file manager (`src/lib/storage/opfs.ts`).
+  - [x] Implement 4MB chunked stream reader/writer utilities for OPFS files.
+  - [x] Implement session directory cleanup lifecycle (`beforeunload`, `visibilitychange`, 24h purge routine).
 - [ ] **0.4 Web Worker Pool Architecture**
   - [ ] Create Worker Pool Coordinator (`src/lib/workers/pool.ts`) with `navigator.hardwareConcurrency` auto-scaling.
   - [ ] Establish typed RPC `postMessage` protocol between main thread and workers.
@@ -128,21 +128,21 @@ requirement, not a later optimization.
   - [ ] Add automated test fixture for synthetic zip bombs (e.g. 42.zip) verifying pre-flight intercept.
 
 #### 1.3 Zip Slip Neutralizer
-- [ ] **1.3.1 Path Sanitizer Core**
-  - [ ] Implement unified `sanitizePath(path: string)` function stripping leading slashes and drive letters (`C:\`).
-  - [ ] Resolve relative `..` directory traversal segments.
-- [ ] **1.3.2 Containment Enforcement & Symlink Validator**
-  - [ ] Reject entries resolving outside extraction root directory and log blocked entry counts.
-  - [ ] Validate TAR symlink targets to block symlinks resolving outside extraction root.
-- [ ] **1.3.3 Sanitizer Unit Test Suite**
-  - [ ] Create unit tests covering 15+ malicious path vectors (`../`, absolute paths, mixed slashes, symlinks).
+- [x] **1.3.1 Path Sanitizer Core**
+  - [x] Implement unified `sanitizePath(path: string)` function stripping leading slashes and drive letters (`C:\`).
+  - [x] Resolve relative `..` directory traversal segments.
+- [x] **1.3.2 Containment Enforcement & Symlink Validator**
+  - [x] Reject entries resolving outside extraction root directory and log blocked entry counts.
+  - [x] Validate TAR symlink targets to block symlinks resolving outside extraction root.
+- [x] **1.3.3 Sanitizer Unit Test Suite**
+  - [x] Create unit tests covering 15+ malicious path vectors (`../`, absolute paths, mixed slashes, symlinks).
 
 #### 1.4 OS Junk Stripper
-- [ ] **1.4.1 Junk Path Matcher Module**
-  - [ ] Implement pattern matcher for OS clutter: `__MACOSX/`, `.DS_Store`, `Thumbs.db`, `desktop.ini`.
-- [ ] **1.4.2 Stage Integrations & UI Toggle**
-  - [ ] Integrate filter into archive listing stage (hiding junk entries from UI tree).
-  - [ ] Integrate filter into extraction/repack pipeline with user toggle (default ON).
+- [x] **1.4.1 Junk Path Matcher Module**
+  - [x] Implement pattern matcher for OS clutter: `__MACOSX/`, `.DS_Store`, `Thumbs.db`, `desktop.ini`.
+- [x] **1.4.2 Stage Integrations & UI Toggle**
+  - [x] Integrate filter into archive listing stage (hiding junk entries from UI tree).
+  - [x] Integrate filter into extraction/repack pipeline with user toggle (default ON).
 
 ---
 
