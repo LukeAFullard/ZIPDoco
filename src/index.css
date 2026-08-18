@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@import "@fontsource/ibm-plex-sans";
+@import "@fontsource/ibm-plex-mono";
+
+@theme {
+  --color-ink: #10161C;
+  --color-stone: #EEF0EC;
+  --color-graphite: #26313A;
+  --color-signal: #D9A54A;
+  --color-signal-dim: #8A6A2F;
+  --color-verdigris: #3E7368;
+  --color-verdigris-dim: #295148;
+  --color-rust: #B85C3E;
+
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --radius-panel: 8px;
+}
+
+@layer base {
+  body {
+    @apply bg-stone text-graphite dark:bg-ink dark:text-stone font-sans antialiased;
+  }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
