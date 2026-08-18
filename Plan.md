@@ -88,10 +88,10 @@ requirement, not a later optimization.
   - [x] Create OPFS session file manager (`src/lib/storage/opfs.ts`).
   - [x] Implement 4MB chunked stream reader/writer utilities for OPFS files.
   - [x] Implement session directory cleanup lifecycle (`beforeunload`, `visibilitychange`, 24h purge routine).
-- [ ] **0.4 Web Worker Pool Architecture**
-  - [ ] Create Worker Pool Coordinator (`src/lib/workers/pool.ts`) with `navigator.hardwareConcurrency` auto-scaling.
-  - [ ] Establish typed RPC `postMessage` protocol between main thread and workers.
-  - [ ] Implement Worker error isolation & try/catch bounds to prevent main thread crashes.
+- [x] **0.4 Web Worker Pool Architecture**
+  - [x] Create Worker Pool Coordinator (`src/lib/workers/pool.ts`) with `navigator.hardwareConcurrency` auto-scaling.
+  - [x] Establish typed RPC `postMessage` protocol between main thread and workers.
+  - [x] Implement Worker error isolation & try/catch bounds to prevent main thread crashes.
 
 ---
 
@@ -112,20 +112,20 @@ requirement, not a later optimization.
   - [ ] Validate output ZIP compatibility with native OS archive tools (macOS, Windows Explorer, 7-Zip).
 
 #### 1.2 Zip Bomb Defense
-- [ ] **1.2.1 Pre-Flight Header Ratio Calculator**
-  - [ ] Parse archive central directory / header headers before decompressing file contents.
-  - [ ] Calculate global expansion ratio `sum(uncompressed_size) / sum(compressed_size)`.
+- [x] **1.2.1 Pre-Flight Header Ratio Calculator**
+  - [x] Parse archive central directory / header headers before decompressing file contents.
+  - [x] Calculate global expansion ratio `sum(uncompressed_size) / sum(compressed_size)`.
 - [ ] **1.2.2 Threshold Trigger & User Intercept UI**
   - [ ] Implement >100:1 ratio warning UI block requiring explicit user override.
   - [ ] Enable single-entry sequential extraction fallback when override is granted.
-- [ ] **1.2.3 Nested Archive Matryoshka Scanner**
-  - [ ] Detect nested archive formats via magic-byte inspection on inner entry headers.
-  - [ ] Recurse expansion ratio check into nested archive entries before extraction.
-- [ ] **1.2.4 Worker Memory Circuit Breaker**
-  - [ ] Track cumulative bytes written to OPFS during decompression inside worker state.
-  - [ ] Hard-abort extraction job & discard partial OPFS output if configurable threshold (10GB) is reached.
-- [ ] **1.2.5 Synthetic Bomb Test Suite**
-  - [ ] Add automated test fixture for synthetic zip bombs (e.g. 42.zip) verifying pre-flight intercept.
+- [x] **1.2.3 Nested Archive Matryoshka Scanner**
+  - [x] Detect nested archive formats via magic-byte inspection on inner entry headers.
+  - [x] Recurse expansion ratio check into nested archive entries before extraction.
+- [x] **1.2.4 Worker Memory Circuit Breaker**
+  - [x] Track cumulative bytes written to OPFS during decompression inside worker state.
+  - [x] Hard-abort extraction job & discard partial OPFS output if configurable threshold (10GB) is reached.
+- [x] **1.2.5 Synthetic Bomb Test Suite**
+  - [x] Add automated test fixture for synthetic zip bombs (e.g. 42.zip) verifying pre-flight intercept.
 
 #### 1.3 Zip Slip Neutralizer
 - [x] **1.3.1 Path Sanitizer Core**
