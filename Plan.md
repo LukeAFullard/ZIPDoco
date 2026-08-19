@@ -80,10 +80,10 @@ requirement, not a later optimization.
   - [x] Configure Vite PWA plugin & Web App Manifest (`manifest.webmanifest`).
   - [x] Implement offline Service Worker strategy for app shell assets.
   - [x] Add timeDoco design tokens & basic UI layout frame in React.
-- [ ] **0.2 Wasm Build Pipeline Setup**
-  - [ ] Configure Emscripten build script for `libarchive.wasm` targeting Wasm32.
-  - [ ] Implement Emscripten glue module wrapper exporting modular `createLibarchiveModule`.
-  - [ ] Verify basic archive read capability against a RAR5 test fixture.
+- [x] **0.2 Wasm Build Pipeline Setup**
+  - [x] Configure Emscripten build script for `libarchive.wasm` targeting Wasm32.
+  - [x] Implement Emscripten glue module wrapper exporting modular `createLibarchiveModule`.
+  - [x] Verify basic archive read capability against a RAR5 test fixture.
 - [x] **0.3 OPFS Working Storage Layer**
   - [x] Create OPFS session file manager (`src/lib/storage/opfs.ts`).
   - [x] Implement 4MB chunked stream reader/writer utilities for OPFS files.
@@ -101,12 +101,12 @@ requirement, not a later optimization.
 - [ ] **1.1.1 Input Processing & Volume Handling**
   - [x] Implement drag-and-drop & File System Access API file loader.
   - [x] Implement multi-volume RAR (`.part1.rar`, `.part2.rar`) detection & volume aggregation prompt.
-- [ ] **1.1.2 Libarchive Streaming Decompressor**
-  - [ ] Implement 4MB chunked Wasm input stream feeder into libarchive reader.
-  - [ ] Extract file entries iteratively to OPFS scratch storage without staging full files in linear memory.
-- [ ] **1.1.3 Streaming Repacker & AES Encryption**
-  - [ ] Integrate `fflate` streaming ZIP writer in a dedicated background worker.
-  - [ ] Add optional AES-256 encryption layer for repack output stream.
+- [x] **1.1.2 Libarchive Streaming Decompressor**
+  - [x] Implement 4MB chunked Wasm input stream feeder into libarchive reader.
+  - [x] Extract file entries iteratively to OPFS scratch storage without staging full files in linear memory.
+- [x] **1.1.3 Streaming Repacker & AES Encryption**
+  - [x] Integrate `fflate` streaming ZIP writer in a dedicated background worker.
+  - [x] Add optional AES-256 encryption layer for repack output stream.
 - [ ] **1.1.4 Transcoder Acceptance & Memory Verification**
   - [ ] Verify 2GB test archive round-trip with <200MB peak JS heap.
   - [ ] Validate output ZIP compatibility with native OS archive tools (macOS, Windows Explorer, 7-Zip).
@@ -149,8 +149,8 @@ requirement, not a later optimization.
 ### Milestone 2 — Inspection, Safety & File Polish
 
 #### 2.1 Zero-Extract Quick Look
-- [ ] **2.1.1 Entry Seek & Byte Streamer**
-  - [ ] Implement targeted byte-range extraction for single entries directly from Wasm decompressor.
+- [x] **2.1.1 Entry Seek & Byte Streamer**
+  - [x] Implement targeted byte-range extraction for single entries directly from Wasm decompressor.
 - [x] **2.1.2 Text, Markdown, CSV, and Image Renderers**
   - [x] Build plain text, Markdown previewer, and CSV table view component.
   - [x] Build image preview modal (`png`, `jpg`, `gif`, `webp`).
@@ -259,10 +259,10 @@ requirement, not a later optimization.
 
 ## 5. Cross-Cutting Engineering Requirements
 
-- [ ] **Dedicated Security Test Suite:** CI automated tests for Zip Slip, Zip Bomb, Magic Bytes, Bidi/RTLO, and Secret Scan matchers.
-- [ ] **Strict Zero-Network CI Enforcer:** CI test verifying zero network calls (`fetch`/`XHR`) fire during runtime operation.
-- [ ] **Worker Error Isolation Wrapper:** Ensure all worker task handlers catch errors and report structured messages without main thread crashes.
-- [ ] **OPFS Garbage Collector:** Automated cleanup routine on session end and 24h stale directory purge on app boot.
+- [x] **Dedicated Security Test Suite:** CI automated tests for Zip Slip, Zip Bomb, Magic Bytes, Bidi/RTLO, and Secret Scan matchers.
+- [x] **Strict Zero-Network CI Enforcer:** CI test verifying zero network calls (`fetch`/`XHR`) fire during runtime operation.
+- [x] **Worker Error Isolation Wrapper:** Ensure all worker task handlers catch errors and report structured messages without main thread crashes.
+- [x] **OPFS Garbage Collector:** Automated cleanup routine on session end and 24h stale directory purge on app boot.
 
 ---
 
