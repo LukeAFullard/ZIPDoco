@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Folder, FolderOpen, FileText, ChevronRight, ChevronDown, Eye, CheckSquare, Square, ShieldAlert } from 'lucide-react';
+import { Folder, FolderOpen, FileText, ChevronRight, ChevronDown, Eye, CheckSquare, Square, ShieldAlert, Search } from 'lucide-react';
 import type { EntrySecurityReport } from '../lib/security/spooferShield';
+import { buildInvertedIndex, type SearchResultItem } from '../lib/search/textIndexer';
 
 export interface FileTreeNodeItem {
   name: string;
@@ -13,7 +14,7 @@ export interface FileTreeNodeItem {
 }
 
 interface FileTreeProps {
-  entries: Array<{ name: string; size?: number; compressedSize?: number; uncompressedSize?: number }>;
+  entries: Array<{ name: string; size?: number; compressedSize?: number; uncompressedSize?: number; content?: string }>;
   securityReports?: EntrySecurityReport[];
   selectedPaths: Set<string>;
   onTogglePath: (path: string) => void;
@@ -190,7 +191,18 @@ export const FileTree: React.FC<FileTreeProps> = ({
   onToggleSelectAll,
   onPreviewFile,
 }) => {
+  const [searchQuery, setSearchQuery] = useState('');
   const treeNodes = useMemo(() => buildTree(entries, securityReports), [entries, securityReports]);
+
+  // Build inverted text index over entry text contents
+  const invertedIndex = useMemo(() => {
+    return buildInvertedIndex(entries.map(e => ({ name: e.name, content: e.content || e.name })));
+  }, [entries]);
+
+  const searchResults: SearchResultItem[] = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    return invertedIndex.search(searchQuery.trim());
+  }, [invertedIndex, searchQuery]);
 
   const allFilePaths = useMemo(() => {
     const paths: string[] = [];
@@ -208,7 +220,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 
   return (
     <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 p-4 space-y-3">
-      <div className="flex items-center justify-between pb-2 border-b border-graphite/10 dark:border-white/10 text-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-graphite/10 dark:border-white/10 text-xs">
         <div className="flex items-center gap-2 font-semibold text-graphite dark:text-stone">
           <Folder size={16} className="text-signal-dim dark:text-signal" />
           <span>Archive File Hierarchy &amp; Selection ({allFilePaths.length} Files)</span>
@@ -217,10 +229,53 @@ export const FileTree: React.FC<FileTreeProps> = ({
         <button
           type="button"
           onClick={() => onToggleSelectAll(!allSelected)}
-          className="text-xs font-medium text-signal-dim dark:text-signal hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-signal rounded px-1"
+          className="text-xs font-medium text-signal-dim dark:text-signal hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-signal rounded px-1 self-start sm:self-auto"
         >
           {allSelected ? 'Deselect All' : 'Select All'}
         </button>
+      </div>
+
+      {/* Full-Text Instant Search Bar */}
+      <div className="relative">
+        <div className="relative flex items-center">
+          <Search size={14} className="absolute left-3 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Instant full-text search inside archive entries..."
+            className="w-full pl-8 pr-3 py-1.5 border border-graphite/20 dark:border-white/15 rounded-panel bg-stone dark:bg-ink text-xs text-graphite dark:text-stone placeholder:text-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+          />
+        </div>
+
+        {searchQuery.trim() !== '' && (
+          <div className="mt-2 border border-signal/30 rounded-panel p-2 bg-stone dark:bg-ink text-xs space-y-2 max-h-[160px] overflow-y-auto">
+            <span className="text-[10px] font-mono text-signal-dim dark:text-signal font-bold uppercase block">
+              Search Results ({searchResults.length} Files Matched)
+            </span>
+            {searchResults.length === 0 ? (
+              <p className="text-gray-500 italic text-[11px]">No matching terms or filenames found.</p>
+            ) : (
+              searchResults.map(res => (
+                <div
+                  key={res.name}
+                  onClick={() => onPreviewFile(res.name)}
+                  className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors space-y-0.5"
+                >
+                  <div className="flex items-center justify-between font-mono font-medium text-[11px]">
+                    <span className="text-signal-dim dark:text-signal">{res.name}</span>
+                    <span className="text-[10px] text-gray-500">Score: {res.score}</span>
+                  </div>
+                  {res.occurrences.map((occ, idx) => (
+                    <p key={idx} className="text-[10px] text-gray-600 dark:text-gray-400 truncate pl-2 border-l border-signal/40">
+                      Line {occ.lineNumber}: {occ.lineContent}
+                    </p>
+                  ))}
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
       <div className="max-h-[350px] overflow-auto space-y-0.5">

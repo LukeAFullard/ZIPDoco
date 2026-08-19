@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Archive, ShieldCheck, KeyRound, Layers, Trash2, CheckCircle2, Languages, FileText } from 'lucide-react';
+import { Archive, ShieldCheck, KeyRound, Layers, Trash2, CheckCircle2, Languages, FileText, GitCompare, Boxes } from 'lucide-react';
 import { SafetySummaryPanel } from './components/SafetySummaryPanel';
 import { ZipBombWarningPanel } from './components/ZipBombWarningPanel';
 import { FileDropZone } from './components/FileDropZone';
 import { PurgeConfirmationModal } from './components/PurgeConfirmationModal';
 import { MojibakeRepairModal, type MangledEntryItem } from './components/MojibakeRepairModal';
 import { AuditReportModal } from './components/AuditReportModal';
+import { ArchiveDiffModal } from './components/ArchiveDiffModal';
 import { FileTree } from './components/FileTree';
 import { QuickLookModal, type QuickLookFile } from './components/QuickLookModal';
 import { scanEntrySecurity, type EntrySecurityReport } from './lib/security/spooferShield';
@@ -14,6 +15,7 @@ import { aggregateVolumeSet, type MultiVolumeSetReport } from './lib/transcoder/
 import { scanEntryLeaks, type EntryLeakReport } from './lib/security/leakScanner';
 import { scanArchiveMojibake } from './lib/security/mojibake';
 import { generateAuditReport, type AuditReportData } from './lib/audit/auditReport';
+import { consolidateBatchQueue, type BatchArchiveItem, type BatchConsolidationReport } from './lib/batch/batchConsolidator';
 import { setupFileLaunchHandler } from './lib/pwa/fileHandling';
 import { setupShareTargetHandler } from './lib/pwa/shareHandler';
 import { useEffect, useCallback } from 'react';
@@ -24,16 +26,23 @@ interface FileEntryItem {
   uncompressedSize?: number;
   magicBytes?: Uint8Array;
   rawBytes?: Uint8Array;
+  content?: string;
 }
 
 const INITIAL_SAMPLE_ENTRIES: FileEntryItem[] = [
-  { name: 'document_v2.pdf', compressedSize: 150000, uncompressedSize: 200000 },
-  { name: 'rÃ©sumÃ©_2025.pdf', compressedSize: 90000, uncompressedSize: 110000 }, // Double-encoded Mojibake
-  { name: 'financial_report.pdf', compressedSize: 100000, uncompressedSize: 120000, magicBytes: new Uint8Array([0x4d, 0x5a, 0x90, 0x00]) }, // PE Executable disguised as PDF!
+  { name: 'document_v2.pdf', compressedSize: 150000, uncompressedSize: 200000, content: 'PDF document content sample' },
+  { name: 'rÃ©sumÃ©_2025.pdf', compressedSize: 90000, uncompressedSize: 110000, content: 'Resume details' }, // Double-encoded Mojibake
+  { name: 'financial_report.pdf', compressedSize: 100000, uncompressedSize: 120000, magicBytes: new Uint8Array([0x4d, 0x5a, 0x90, 0x00]), content: 'MZ Header content' }, // PE Executable disguised as PDF!
   { name: 'invoice_2025.pdf.exe', compressedSize: 50000, uncompressedSize: 80000 }, // Double extension
   { name: 'tax_return_\u202Egpj.exe', compressedSize: 40000, uncompressedSize: 60000 }, // RTLO bidi spoof
-  { name: 'config/.env', compressedSize: 200, uncompressedSize: 1500 }, // Credential file
-  { name: 'keys/id_rsa', compressedSize: 800, uncompressedSize: 3200 }, // Private key
+  { name: 'config/.env', compressedSize: 200, uncompressedSize: 1500, content: 'AWS_SECRET_ACCESS_KEY=AKIA1234567890' }, // Credential file
+  { name: 'keys/id_rsa', compressedSize: 800, uncompressedSize: 3200, content: '-----BEGIN RSA PRIVATE KEY-----' }, // Private key
+];
+
+const SECONDARY_DIFF_SAMPLE: FileEntryItem[] = [
+  { name: 'document_v2.pdf', compressedSize: 180000, uncompressedSize: 220000, content: 'PDF document content sample v2 modified' },
+  { name: 'config/.env', compressedSize: 200, uncompressedSize: 1500, content: 'AWS_SECRET_ACCESS_KEY=AKIA1234567890' },
+  { name: 'new_release_notes.md', compressedSize: 5000, uncompressedSize: 12000, content: '# Release Notes v2.0' },
 ];
 
 function App() {
@@ -45,12 +54,14 @@ function App() {
   const [leakReports, setLeakReports] = useState<EntryLeakReport[]>([]);
   const [mangledEntries, setMangledEntries] = useState<MangledEntryItem[]>([]);
   const [auditReport, setAuditReport] = useState<AuditReportData | null>(null);
+  const [batchReport, setBatchReport] = useState<BatchConsolidationReport | null>(null);
   const [hasScanned, setHasScanned] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
 
   const [isPurgeModalOpen, setIsPurgeModalOpen] = useState(false);
   const [isMojibakeModalOpen, setIsMojibakeModalOpen] = useState(false);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+  const [isDiffModalOpen, setIsDiffModalOpen] = useState(false);
 
   const [quickLookFile, setQuickLookFile] = useState<QuickLookFile | null>(null);
   const [isQuickLookOpen, setIsQuickLookOpen] = useState(false);
@@ -88,7 +99,19 @@ function App() {
     const mojibakeResults = scanArchiveMojibake(files);
     setMangledEntries(mojibakeResults);
 
-    // 6. Generate Audit Report Data
+    // 6. Batch Queue Consolidation & Deduplication Scan
+    const batchQueue: BatchArchiveItem[] = [
+      {
+        id: 'current_session',
+        name: activeFileName,
+        size: files.reduce((acc, cur) => acc + (cur.compressedSize || 1000), 0),
+        entries: files.map(f => ({ path: f.name, size: f.uncompressedSize || 1000, content: f.content })),
+      },
+    ];
+    const consolidation = consolidateBatchQueue(batchQueue);
+    setBatchReport(consolidation);
+
+    // 7. Generate Audit Report Data
     const generatedAudit = generateAuditReport({
       archiveName: activeFileName,
       entries: files,
@@ -187,7 +210,7 @@ function App() {
     setQuickLookFile({
       name: foundEntry.name,
       uncompressedSize: foundEntry.uncompressedSize || foundEntry.compressedSize,
-      content: foundEntry.rawBytes,
+      content: foundEntry.content || foundEntry.rawBytes,
     });
     setIsQuickLookOpen(true);
   };
@@ -225,19 +248,43 @@ function App() {
         {/* Active Session Displays */}
         {hasScanned && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 font-mono border-b border-graphite/10 dark:border-white/10 pb-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500 dark:text-gray-400 font-mono border-b border-graphite/10 dark:border-white/10 pb-2">
               <span className="truncate max-w-xs">
                 ACTIVE SESSION: {fileName} ({selectedPaths.size}/{activeEntries.length} SELECTED)
               </span>
-              <button
-                type="button"
-                onClick={() => setIsAuditModalOpen(true)}
-                className="bg-stone border border-graphite/20 dark:bg-graphite dark:border-white/15 dark:text-stone text-graphite hover:bg-gray-100 dark:hover:bg-gray-800 inline-flex items-center gap-1 px-2.5 py-1 rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
-              >
-                <FileText size={14} className="text-signal-dim dark:text-signal" />
-                <span>Export Audit Report</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsDiffModalOpen(true)}
+                  className="bg-stone border border-graphite/20 dark:bg-graphite dark:border-white/15 dark:text-stone text-graphite hover:bg-gray-100 dark:hover:bg-gray-800 inline-flex items-center gap-1 px-2.5 py-1 rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                >
+                  <GitCompare size={14} className="text-signal-dim dark:text-signal" />
+                  <span>Archive Diff</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsAuditModalOpen(true)}
+                  className="bg-stone border border-graphite/20 dark:bg-graphite dark:border-white/15 dark:text-stone text-graphite hover:bg-gray-100 dark:hover:bg-gray-800 inline-flex items-center gap-1 px-2.5 py-1 rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                >
+                  <FileText size={14} className="text-signal-dim dark:text-signal" />
+                  <span>Export Audit Report</span>
+                </button>
+              </div>
             </div>
+
+            {/* Batch Consolidator Summary Banner */}
+            {batchReport && (
+              <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 p-3 text-xs flex items-center justify-between">
+                <div className="flex items-center gap-2 font-mono">
+                  <Boxes size={16} className="text-signal-dim dark:text-signal" />
+                  <span>Batch Queue Consolidation: {batchReport.uniqueEntriesCount} Unique / {batchReport.duplicateEntriesCount} Duplicate File(s)</span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-verdigris/15 text-verdigris font-semibold">
+                  OPFS Deduplication Ready
+                </span>
+              </div>
+            )}
 
             {/* Zip Bomb Warning Panel */}
             {zipBombResult && <ZipBombWarningPanel checkResult={zipBombResult} />}
@@ -253,9 +300,9 @@ function App() {
               </div>
             )}
 
-            {/* Interactive File Tree Hierarchy & Selective Extraction */}
+            {/* Interactive File Tree Hierarchy & Full-Text Instant Search */}
             <FileTree
-              entries={activeEntries}
+              entries={activeEntries.map(e => ({ ...e, path: e.name }))}
               securityReports={reports}
               selectedPaths={selectedPaths}
               onTogglePath={handleTogglePath}
@@ -354,6 +401,14 @@ function App() {
         isOpen={isAuditModalOpen}
         onClose={() => setIsAuditModalOpen(false)}
         report={auditReport}
+      />
+
+      {/* Side-by-Side Archive Diff Modal */}
+      <ArchiveDiffModal
+        isOpen={isDiffModalOpen}
+        onClose={() => setIsDiffModalOpen(false)}
+        primaryEntries={activeEntries.map(e => ({ path: e.name, size: e.uncompressedSize, content: e.content }))}
+        secondaryEntries={SECONDARY_DIFF_SAMPLE.map(e => ({ path: e.name, size: e.uncompressedSize, content: e.content }))}
       />
 
       {/* Zero-Extract Quick Look Modal */}
