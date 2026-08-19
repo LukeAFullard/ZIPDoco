@@ -203,20 +203,20 @@ requirement, not a later optimization.
   - [x] Provide one-click purge action removing flagged secrets from repack output stream.
 
 #### 3.2 Batch Consolidator
-- [ ] **3.2.1 Multi-Archive Queue Manager**
-  - [ ] Support multi-file drag-and-drop batch queueing.
-- [ ] **3.2.2 Isolated Batch Extraction ("Unzip All")**
-  - [ ] Extract multiple archives into isolated, collision-safe OPFS folders.
-- [ ] **3.2.3 Content-Deduplicated Master Repack ("Merge All")**
-  - [ ] Calculate SHA-256 hashes of entry byte streams.
-  - [ ] Build master ZIP writer skipping duplicate file byte streams regardless of original path names.
+- [x] **3.2.1 Multi-Archive Queue Manager**
+  - [x] Support multi-file drag-and-drop batch queueing.
+- [x] **3.2.2 Isolated Batch Extraction ("Unzip All")**
+  - [x] Extract multiple archives into isolated, collision-safe OPFS folders.
+- [x] **3.2.3 Content-Deduplicated Master Repack ("Merge All")**
+  - [x] Calculate SHA-256 hashes of entry byte streams.
+  - [x] Build master ZIP writer skipping duplicate file byte streams regardless of original path names.
 
 #### 3.3 Archive Diff
-- [ ] **3.3.1 Dual-Pane Tree Comparison Engine**
-  - [ ] Compare two archives side-by-side to detect added, removed, modified, and identical files.
-- [ ] **3.3.2 Two-Column Line-Level Text Diff**
-  - [ ] Implement client-side LCS text diffing algorithm for modified code/text files.
-  - [ ] Render two-column highlighted text diff view.
+- [x] **3.3.1 Dual-Pane Tree Comparison Engine**
+  - [x] Compare two archives side-by-side to detect added, removed, modified, and identical files.
+- [x] **3.3.2 Two-Column Line-Level Text Diff**
+  - [x] Implement client-side LCS text diffing algorithm for modified code/text files.
+  - [x] Render two-column highlighted text diff view.
 
 #### 3.4 Exportable Audit Report
 - [x] **3.4.1 Audit Summary Data Schema**
@@ -249,11 +249,11 @@ requirement, not a later optimization.
   - [ ] Recognize CBR/CBZ extensions and provide paginated reader interface.
 
 #### 4.4 Full-Text Search Inside Archive
-- [ ] **4.4.1 Client-Side Inverted Text Indexer**
-  - [ ] Index text content of files (<5MB) into an in-memory inverted index without disk extraction.
-- [ ] **4.4.2 Instant Search UI & Quick Look Jump**
-  - [ ] Provide instant search input returning matching entries and line occurrences in <500ms.
-  - [ ] Connect search results directly to Quick Look preview.
+- [x] **4.4.1 Client-Side Inverted Text Indexer**
+  - [x] Index text content of files (<5MB) into an in-memory inverted index without disk extraction.
+- [x] **4.4.2 Instant Search UI & Quick Look Jump**
+  - [x] Provide instant search input returning matching entries and line occurrences in <500ms.
+  - [x] Connect search results directly to Quick Look preview.
 
 ---
 
