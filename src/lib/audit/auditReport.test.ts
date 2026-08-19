@@ -13,10 +13,31 @@ describe('Audit Report Generation Utility', () => {
         { name: 'photo.jpg', compressedSize: 5000, uncompressedSize: 5100 },
       ],
       securityReports: [
-        { entryName: 'doc.pdf', riskLevel: 'safe', warnings: [], magicMismatch: false, disguisedExtension: false, bidiSpoof: false },
-        { entryName: 'photo.jpg', riskLevel: 'safe', warnings: [], magicMismatch: false, disguisedExtension: false, bidiSpoof: false },
+        {
+          filename: 'doc.pdf',
+          riskLevel: 'safe',
+          warnings: [],
+          bidi: { hasBidi: false, charactersFound: [] },
+          executable: { isDisguised: false, isRiskyExtension: false, extension: 'pdf' },
+          magicByte: { isMismatch: false, claimedExtension: 'pdf' }
+        },
+        {
+          filename: 'photo.jpg',
+          riskLevel: 'safe',
+          warnings: [],
+          bidi: { hasBidi: false, charactersFound: [] },
+          executable: { isDisguised: false, isRiskyExtension: false, extension: 'jpg' },
+          magicByte: { isMismatch: false, claimedExtension: 'jpg' }
+        },
       ],
-      zipBombReport: { overallRatio: 1.1, exceedsThreshold: false, maxRatioAllowed: 100 },
+      zipBombReport: {
+        isBombWarning: false,
+        globalRatio: 1.1,
+        maxEntryRatio: 1.1,
+        totalCompressed: 6000,
+        totalUncompressed: 6300,
+        nestedArchivesDetected: false
+      },
       leakReports: [],
       mojibakeFindings: [],
     });
@@ -39,18 +60,21 @@ describe('Audit Report Generation Utility', () => {
     };
 
     const mockBomb: ZipBombCheckResult = {
-      overallRatio: 500,
-      exceedsThreshold: true,
-      maxRatioAllowed: 100,
+      isBombWarning: true,
+      globalRatio: 500,
+      maxEntryRatio: 500,
+      totalCompressed: 100,
+      totalUncompressed: 50000,
+      nestedArchivesDetected: false
     };
 
     const mockSpoofer: EntrySecurityReport = {
-      entryName: 'invoice.pdf.exe',
-      riskLevel: 'high',
+      filename: 'invoice.pdf.exe',
+      riskLevel: 'danger',
       warnings: ['Disguised executable extension'],
-      magicMismatch: false,
-      disguisedExtension: true,
-      bidiSpoof: false,
+      bidi: { hasBidi: false, charactersFound: [] },
+      executable: { isDisguised: true, isRiskyExtension: true, extension: 'exe', doubleExtension: '.pdf.exe' },
+      magicByte: { isMismatch: false, claimedExtension: 'exe' }
     };
 
     const report = generateAuditReport({

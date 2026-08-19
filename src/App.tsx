@@ -6,6 +6,8 @@ import { FileDropZone } from './components/FileDropZone';
 import { PurgeConfirmationModal } from './components/PurgeConfirmationModal';
 import { MojibakeRepairModal, type MangledEntryItem } from './components/MojibakeRepairModal';
 import { AuditReportModal } from './components/AuditReportModal';
+import { FileTree } from './components/FileTree';
+import { QuickLookModal, type QuickLookFile } from './components/QuickLookModal';
 import { scanEntrySecurity, type EntrySecurityReport } from './lib/security/spooferShield';
 import { checkZipBombThreshold, type ZipBombCheckResult, type ArchiveEntryMeta } from './lib/security/zipBomb';
 import { aggregateVolumeSet, type MultiVolumeSetReport } from './lib/transcoder/volumeDetector';
@@ -33,6 +35,7 @@ const INITIAL_SAMPLE_ENTRIES: FileEntryItem[] = [
 
 function App() {
   const [activeEntries, setActiveEntries] = useState<FileEntryItem[]>([]);
+  const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
   const [reports, setReports] = useState<EntrySecurityReport[]>([]);
   const [zipBombResult, setZipBombResult] = useState<ZipBombCheckResult | null>(null);
   const [volumeReport, setVolumeReport] = useState<MultiVolumeSetReport | null>(null);
@@ -45,10 +48,15 @@ function App() {
   const [isPurgeModalOpen, setIsPurgeModalOpen] = useState(false);
   const [isMojibakeModalOpen, setIsMojibakeModalOpen] = useState(false);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+
+  const [quickLookFile, setQuickLookFile] = useState<QuickLookFile | null>(null);
+  const [isQuickLookOpen, setIsQuickLookOpen] = useState(false);
+
   const [sessionNotice, setSessionNotice] = useState<string | null>(null);
 
   const processEntries = (files: FileEntryItem[], nameLabel?: string) => {
     setActiveEntries(files);
+    setSelectedPaths(new Set(files.map(f => f.name)));
     const activeFileName = nameLabel ?? fileName ?? 'archive.zip';
 
     // 1. Spoofer Shield Scan
@@ -132,6 +140,38 @@ function App() {
     processEntries(repairedFiles);
   };
 
+  const handleTogglePath = (path: string) => {
+    setSelectedPaths(prev => {
+      const next = new Set(prev);
+      if (next.has(path)) {
+        next.delete(path);
+      } else {
+        next.add(path);
+      }
+      return next;
+    });
+  };
+
+  const handleToggleSelectAll = (select: boolean) => {
+    if (select) {
+      setSelectedPaths(new Set(activeEntries.map(e => e.name)));
+    } else {
+      setSelectedPaths(new Set());
+    }
+  };
+
+  const handlePreviewFile = (path: string) => {
+    const foundEntry = activeEntries.find(e => e.name === path);
+    if (!foundEntry) return;
+
+    setQuickLookFile({
+      name: foundEntry.name,
+      uncompressedSize: foundEntry.uncompressedSize || foundEntry.compressedSize,
+      content: foundEntry.rawBytes,
+    });
+    setIsQuickLookOpen(true);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-stone dark:bg-ink text-graphite dark:text-stone font-sans transition-colors">
       <header className="border-b border-graphite/20 dark:border-white/15 bg-stone dark:bg-graphite">
@@ -166,7 +206,9 @@ function App() {
         {hasScanned && (
           <div className="space-y-6">
             <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 font-mono border-b border-graphite/10 dark:border-white/10 pb-2">
-              <span className="truncate max-w-xs">ACTIVE SESSION: {fileName} ({reports.length} ENTRIES)</span>
+              <span className="truncate max-w-xs">
+                ACTIVE SESSION: {fileName} ({selectedPaths.size}/{activeEntries.length} SELECTED)
+              </span>
               <button
                 type="button"
                 onClick={() => setIsAuditModalOpen(true)}
@@ -190,6 +232,16 @@ function App() {
                 <p className="text-gray-600 dark:text-gray-300">{volumeReport.promptMessage}</p>
               </div>
             )}
+
+            {/* Interactive File Tree Hierarchy & Selective Extraction */}
+            <FileTree
+              entries={activeEntries}
+              securityReports={reports}
+              selectedPaths={selectedPaths}
+              onTogglePath={handleTogglePath}
+              onToggleSelectAll={handleToggleSelectAll}
+              onPreviewFile={handlePreviewFile}
+            />
 
             {/* Mojibake Repair Banner */}
             {mangledEntries.length > 0 && (
@@ -282,6 +334,13 @@ function App() {
         isOpen={isAuditModalOpen}
         onClose={() => setIsAuditModalOpen(false)}
         report={auditReport}
+      />
+
+      {/* Zero-Extract Quick Look Modal */}
+      <QuickLookModal
+        isOpen={isQuickLookOpen}
+        onClose={() => setIsQuickLookOpen(false)}
+        file={quickLookFile}
       />
     </div>
   );

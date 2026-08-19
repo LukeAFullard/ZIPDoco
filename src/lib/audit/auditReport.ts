@@ -53,11 +53,11 @@ export function generateAuditReport(options: GenerateAuditReportOptions): AuditR
   const spooferRisksCount = securityReports.filter(r => r.riskLevel !== 'safe').length;
   const secretLeaksCount = leakReports.filter(l => l.isFlagged).length;
   const mojibakeCount = mojibakeFindings.filter(m => m.isMangled).length;
-  const zipBombDetected = zipBombReport?.exceedsThreshold ?? false;
+  const zipBombDetected = zipBombReport?.isBombWarning ?? false;
 
   // Build manifest
   const manifest: AuditReportManifestItem[] = entries.map(e => {
-    const spoofer = securityReports.find(s => s.entryName === e.name);
+    const spoofer = securityReports.find(s => s.filename === e.name);
     const leak = leakReports.find(l => l.entryName === e.name);
     const mojibake = mojibakeFindings.find(m => m.original === e.name);
 
@@ -86,7 +86,7 @@ export function generateAuditReport(options: GenerateAuditReportOptions): AuditR
 
   // Risk rating calculation
   let riskRating: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
-  if (zipBombDetected || securityReports.some(r => r.riskLevel === 'high') || secretLeaksCount > 0) {
+  if (zipBombDetected || securityReports.some(r => r.riskLevel === 'danger') || secretLeaksCount > 0) {
     riskRating = 'CRITICAL';
   } else if (spooferRisksCount > 0) {
     riskRating = 'HIGH';
@@ -106,7 +106,7 @@ export function generateAuditReport(options: GenerateAuditReportOptions): AuditR
       secretLeaksCount,
       mojibakeCount,
       zipBombDetected,
-      overallRatio: zipBombReport?.overallRatio ?? 1,
+      overallRatio: zipBombReport?.globalRatio ?? 1,
       riskRating,
     },
     details: {
