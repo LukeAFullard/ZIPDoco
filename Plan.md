@@ -98,7 +98,7 @@ requirement, not a later optimization.
 ### Milestone 1 — Core MVP & Security Shields
 
 #### 1.1 Universal Transcoder
-- [ ] **1.1.1 Input Processing & Volume Handling**
+- [x] **1.1.1 Input Processing & Volume Handling**
   - [x] Implement drag-and-drop & File System Access API file loader.
   - [x] Implement multi-volume RAR (`.part1.rar`, `.part2.rar`) detection & volume aggregation prompt.
 - [x] **1.1.2 Libarchive Streaming Decompressor**
@@ -107,9 +107,9 @@ requirement, not a later optimization.
 - [x] **1.1.3 Streaming Repacker & AES Encryption**
   - [x] Integrate `fflate` streaming ZIP writer in a dedicated background worker.
   - [x] Add optional AES-256 encryption layer for repack output stream.
-- [ ] **1.1.4 Transcoder Acceptance & Memory Verification**
-  - [ ] Verify 2GB test archive round-trip with <200MB peak JS heap.
-  - [ ] Validate output ZIP compatibility with native OS archive tools (macOS, Windows Explorer, 7-Zip).
+- [x] **1.1.4 Transcoder Acceptance & Memory Verification**
+  - [x] Verify 2GB test archive round-trip with <200MB peak JS heap.
+  - [x] Validate output ZIP compatibility with native OS archive tools (macOS, Windows Explorer, 7-Zip).
 
 #### 1.2 Zip Bomb Defense
 - [x] **1.2.1 Pre-Flight Header Ratio Calculator**
