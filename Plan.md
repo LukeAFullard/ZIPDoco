@@ -151,20 +151,20 @@ requirement, not a later optimization.
 #### 2.1 Zero-Extract Quick Look
 - [ ] **2.1.1 Entry Seek & Byte Streamer**
   - [ ] Implement targeted byte-range extraction for single entries directly from Wasm decompressor.
-- [ ] **2.1.2 Text, Markdown, CSV, and Image Renderers**
-  - [ ] Build plain text, Markdown previewer, and CSV table view component.
-  - [ ] Build image preview modal (`png`, `jpg`, `gif`, `webp`).
-- [ ] **2.1.3 Syntax Highlighting Component**
-  - [ ] Integrate lightweight syntax highlighter (Prism/Shiki lazy-loaded) for source files (`.py`, `.js`, `.ts`, `.go`, `.rs`, `.java`).
+- [x] **2.1.2 Text, Markdown, CSV, and Image Renderers**
+  - [x] Build plain text, Markdown previewer, and CSV table view component.
+  - [x] Build image preview modal (`png`, `jpg`, `gif`, `webp`).
+- [x] **2.1.3 Syntax Highlighting Component**
+  - [x] Integrate lightweight syntax highlighter (Prism/Shiki lazy-loaded) for source files (`.py`, `.js`, `.ts`, `.go`, `.rs`, `.java`).
 - [ ] **2.1.4 Wasm PDF Renderer Integration**
   - [ ] Integrate pdf.js / Wasm PDF renderer for in-browser PDF previews.
 
 #### 2.2 Selective Extraction
-- [ ] **2.2.1 Virtualized File Tree Component**
-  - [ ] Build high-performance virtualized file tree UI handling 10,000+ archive entries.
-- [ ] **2.2.2 Granular Selection State & Download Trigger**
-  - [ ] Add checkbox selection state at file and directory levels.
-  - [ ] Connect "Extract Selected" action to stream chosen files directly to OPFS / browser download.
+- [x] **2.2.1 Virtualized File Tree Component**
+  - [x] Build high-performance virtualized file tree UI handling 10,000+ archive entries.
+- [x] **2.2.2 Granular Selection State & Download Trigger**
+  - [x] Add checkbox selection state at file and directory levels.
+  - [x] Connect "Extract Selected" action to stream chosen files directly to OPFS / browser download.
 
 #### 2.3 Mojibake Repair
 - [x] **2.3.1 Character Set Detector Integration**
