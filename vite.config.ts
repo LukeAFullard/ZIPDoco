@@ -18,6 +18,49 @@ export default defineConfig({
         theme_color: '#EEF0EC',
         background_color: '#EEF0EC',
         display: 'standalone',
+        file_handlers: [
+          {
+            action: '/',
+            accept: {
+              'application/zip': ['.zip'],
+              'application/x-rar-compressed': ['.rar'],
+              'application/x-7z-compressed': ['.7z'],
+              'application/x-tar': ['.tar'],
+              'application/gzip': ['.gz', '.tgz'],
+              'application/x-bzip2': ['.bz2'],
+              'application/x-xz': ['.xz']
+            }
+          }
+        ],
+        share_target: {
+          action: '/share-target',
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: {
+            files: [
+              {
+                name: 'archive',
+                accept: [
+                  '.zip',
+                  '.rar',
+                  '.7z',
+                  '.tar',
+                  '.gz',
+                  '.tgz',
+                  '.bz2',
+                  '.xz',
+                  'application/zip',
+                  'application/x-rar-compressed',
+                  'application/x-7z-compressed',
+                  'application/x-tar',
+                  'application/gzip',
+                  'application/x-bzip2',
+                  'application/x-xz'
+                ]
+              }
+            ]
+          }
+        },
         icons: [
           {
             src: 'pwa-64x64.png',

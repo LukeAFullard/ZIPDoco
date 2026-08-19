@@ -14,6 +14,9 @@ import { aggregateVolumeSet, type MultiVolumeSetReport } from './lib/transcoder/
 import { scanEntryLeaks, type EntryLeakReport } from './lib/security/leakScanner';
 import { scanArchiveMojibake } from './lib/security/mojibake';
 import { generateAuditReport, type AuditReportData } from './lib/audit/auditReport';
+import { setupFileLaunchHandler } from './lib/pwa/fileHandling';
+import { setupShareTargetHandler } from './lib/pwa/shareHandler';
+import { useEffect, useCallback } from 'react';
 
 interface FileEntryItem {
   name: string;
@@ -54,7 +57,7 @@ function App() {
 
   const [sessionNotice, setSessionNotice] = useState<string | null>(null);
 
-  const processEntries = (files: FileEntryItem[], nameLabel?: string) => {
+  const processEntries = useCallback((files: FileEntryItem[], nameLabel?: string) => {
     setActiveEntries(files);
     setSelectedPaths(new Set(files.map(f => f.name)));
     const activeFileName = nameLabel ?? fileName ?? 'archive.zip';
@@ -98,9 +101,9 @@ function App() {
 
     setHasScanned(true);
     if (nameLabel) setFileName(nameLabel);
-  };
+  }, [fileName]);
 
-  const handleFilesSelected = (files: File[]) => {
+  const handleFilesSelected = useCallback((files: File[]) => {
     setSessionNotice(null);
     const fileItems: FileEntryItem[] = files.map(f => ({
       name: f.name,
@@ -108,7 +111,24 @@ function App() {
       uncompressedSize: f.size,
     }));
     processEntries(fileItems, files.length === 1 ? files[0].name : `${files.length} files archive`);
-  };
+  }, [processEntries]);
+
+  useEffect(() => {
+    const cleanupLaunch = setupFileLaunchHandler((launchedFiles) => {
+      if (launchedFiles.length > 0) {
+        handleFilesSelected(launchedFiles);
+      }
+    });
+    const cleanupShare = setupShareTargetHandler((sharedFiles) => {
+      if (sharedFiles.length > 0) {
+        handleFilesSelected(sharedFiles);
+      }
+    });
+    return () => {
+      cleanupLaunch();
+      cleanupShare();
+    };
+  }, [handleFilesSelected]);
 
   const handleScanSample = () => {
     setSessionNotice(null);

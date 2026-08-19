@@ -230,16 +230,16 @@ requirement, not a later optimization.
 ### Milestone 4 — PWA-Native Differentiation
 
 #### 4.1 File Handling API Registration
-- [ ] **4.1.1 Manifest Registration**
-  - [ ] Register file handlers in `manifest.webmanifest` for `.zip`, `.rar`, `.7z`, `.tar.gz`.
-- [ ] **4.1.2 Chromium OS Integration Handler**
-  - [ ] Wire `launchQueue.setConsumer()` in `main.tsx` to handle direct OS file double-click launches.
+- [x] **4.1.1 Manifest Registration**
+  - [x] Register file handlers in `manifest.webmanifest` for `.zip`, `.rar`, `.7z`, `.tar.gz`.
+- [x] **4.1.2 Chromium OS Integration Handler**
+  - [x] Wire `launchQueue.setConsumer()` in `main.tsx` to handle direct OS file double-click launches.
 
 #### 4.2 Web Share Target API
-- [ ] **4.2.1 Share Target Manifest Configuration**
-  - [ ] Configure `share_target` field in web manifest for receiving shared files.
-- [ ] **4.2.2 Service Worker Share Payload Handler**
-  - [ ] Add Service Worker `fetch` intercept for incoming share POST data and pass file handles to UI.
+- [x] **4.2.1 Share Target Manifest Configuration**
+  - [x] Configure `share_target` field in web manifest for receiving shared files.
+- [x] **4.2.2 Service Worker Share Payload Handler**
+  - [x] Add Service Worker `fetch` intercept for incoming share POST data and pass file handles to UI.
 
 #### 4.3 Thumbnail Grid & Comic Reader View
 - [ ] **4.3.1 Lazy Canvas Thumbnail Generator**
