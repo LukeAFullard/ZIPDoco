@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Archive, ShieldCheck, KeyRound, Layers, Trash2, CheckCircle2, Languages, FileText, GitCompare, Boxes } from 'lucide-react';
+import { Archive, ShieldCheck, KeyRound, Layers, Trash2, CheckCircle2, Languages, FileText, GitCompare, Boxes, BookOpen } from 'lucide-react';
 import { SafetySummaryPanel } from './components/SafetySummaryPanel';
 import { ZipBombWarningPanel } from './components/ZipBombWarningPanel';
 import { FileDropZone } from './components/FileDropZone';
@@ -9,6 +9,8 @@ import { AuditReportModal } from './components/AuditReportModal';
 import { ArchiveDiffModal } from './components/ArchiveDiffModal';
 import { FileTree } from './components/FileTree';
 import { QuickLookModal, type QuickLookFile } from './components/QuickLookModal';
+import { ThumbnailGrid } from './components/ThumbnailGrid';
+import { ComicReaderModal } from './components/ComicReaderModal';
 import { scanEntrySecurity, type EntrySecurityReport } from './lib/security/spooferShield';
 import { checkZipBombThreshold, type ZipBombCheckResult, type ArchiveEntryMeta } from './lib/security/zipBomb';
 import { aggregateVolumeSet, type MultiVolumeSetReport } from './lib/transcoder/volumeDetector';
@@ -16,6 +18,7 @@ import { scanEntryLeaks, type EntryLeakReport } from './lib/security/leakScanner
 import { scanArchiveMojibake } from './lib/security/mojibake';
 import { generateAuditReport, type AuditReportData } from './lib/audit/auditReport';
 import { consolidateBatchQueue, type BatchArchiveItem, type BatchConsolidationReport } from './lib/batch/batchConsolidator';
+import { isComicArchive, parseComicInfo } from './lib/viewer/comicReader';
 import { setupFileLaunchHandler } from './lib/pwa/fileHandling';
 import { setupShareTargetHandler } from './lib/pwa/shareHandler';
 import { useEffect, useCallback } from 'react';
@@ -31,12 +34,25 @@ interface FileEntryItem {
 
 const INITIAL_SAMPLE_ENTRIES: FileEntryItem[] = [
   { name: 'document_v2.pdf', compressedSize: 150000, uncompressedSize: 200000, content: 'PDF document content sample' },
-  { name: 'rÃ©sumÃ©_2025.pdf', compressedSize: 90000, uncompressedSize: 110000, content: 'Resume details' }, // Double-encoded Mojibake
-  { name: 'financial_report.pdf', compressedSize: 100000, uncompressedSize: 120000, magicBytes: new Uint8Array([0x4d, 0x5a, 0x90, 0x00]), content: 'MZ Header content' }, // PE Executable disguised as PDF!
-  { name: 'invoice_2025.pdf.exe', compressedSize: 50000, uncompressedSize: 80000 }, // Double extension
-  { name: 'tax_return_\u202Egpj.exe', compressedSize: 40000, uncompressedSize: 60000 }, // RTLO bidi spoof
-  { name: 'config/.env', compressedSize: 200, uncompressedSize: 1500, content: 'AWS_SECRET_ACCESS_KEY=AKIA1234567890' }, // Credential file
-  { name: 'keys/id_rsa', compressedSize: 800, uncompressedSize: 3200, content: '-----BEGIN RSA PRIVATE KEY-----' }, // Private key
+  { name: 'rÃ©sumÃ©_2025.pdf', compressedSize: 90000, uncompressedSize: 110000, content: 'Resume details' },
+  { name: 'financial_report.pdf', compressedSize: 100000, uncompressedSize: 120000, magicBytes: new Uint8Array([0x4d, 0x5a, 0x90, 0x00]), content: 'MZ Header content' },
+  { name: 'invoice_2025.pdf.exe', compressedSize: 50000, uncompressedSize: 80000 },
+  { name: 'tax_return_\u202Egpj.exe', compressedSize: 40000, uncompressedSize: 60000 },
+  { name: 'config/.env', compressedSize: 200, uncompressedSize: 1500, content: 'AWS_SECRET_ACCESS_KEY=AKIA1234567890' },
+  { name: 'keys/id_rsa', compressedSize: 800, uncompressedSize: 3200, content: '-----BEGIN RSA PRIVATE KEY-----' },
+];
+
+const COMIC_SAMPLE_ENTRIES: FileEntryItem[] = [
+  { name: 'cover.jpg', compressedSize: 120000, uncompressedSize: 150000, content: 'sample image data 1' },
+  { name: 'page_01.jpg', compressedSize: 110000, uncompressedSize: 140000, content: 'sample image data 2' },
+  { name: 'page_02.jpg', compressedSize: 115000, uncompressedSize: 145000, content: 'sample image data 3' },
+  { name: 'page_03.jpg', compressedSize: 125000, uncompressedSize: 155000, content: 'sample image data 4' },
+  { name: 'page_04.jpg', compressedSize: 130000, uncompressedSize: 160000, content: 'sample image data 5' },
+];
+
+const PDF_SAMPLE_ENTRIES: FileEntryItem[] = [
+  { name: 'security_audit_report.pdf', compressedSize: 350000, uncompressedSize: 500000, content: 'Confidential Security Audit Report for Untrusted Archives\n\nExecutive Summary:\nAll archive entries scanned successfully with zero network dependencies.' },
+  { name: 'architecture_diagram.pdf', compressedSize: 250000, uncompressedSize: 400000, content: 'WebAssembly & OPFS Streaming Architecture Overview' },
 ];
 
 const SECONDARY_DIFF_SAMPLE: FileEntryItem[] = [
@@ -62,6 +78,7 @@ function App() {
   const [isMojibakeModalOpen, setIsMojibakeModalOpen] = useState(false);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [isDiffModalOpen, setIsDiffModalOpen] = useState(false);
+  const [isComicReaderOpen, setIsComicReaderOpen] = useState(false);
 
   const [quickLookFile, setQuickLookFile] = useState<QuickLookFile | null>(null);
   const [isQuickLookOpen, setIsQuickLookOpen] = useState(false);
@@ -158,6 +175,16 @@ function App() {
     processEntries(INITIAL_SAMPLE_ENTRIES, 'untrusted_incoming_files.zip');
   };
 
+  const handleScanComicSample = () => {
+    setSessionNotice(null);
+    processEntries(COMIC_SAMPLE_ENTRIES, 'Cyberpunk_Issue_01.cbz');
+  };
+
+  const handleScanPdfSample = () => {
+    setSessionNotice(null);
+    processEntries(PDF_SAMPLE_ENTRIES, 'quarterly_security_docs.zip');
+  };
+
   const handleTriggerBombSample = () => {
     setSessionNotice(null);
     const bombEntries: FileEntryItem[] = [
@@ -215,6 +242,9 @@ function App() {
     setIsQuickLookOpen(true);
   };
 
+  const isComic = isComicArchive(fileName || '', activeEntries);
+  const comicInfo = parseComicInfo(fileName || '', activeEntries);
+
   return (
     <div className="min-h-screen flex flex-col bg-stone dark:bg-ink text-graphite dark:text-stone font-sans transition-colors">
       <header className="border-b border-graphite/20 dark:border-white/15 bg-stone dark:bg-graphite">
@@ -235,6 +265,8 @@ function App() {
           onFilesSelected={handleFilesSelected}
           onScanSample={handleScanSample}
           onTriggerBombSample={handleTriggerBombSample}
+          onScanComicSample={handleScanComicSample}
+          onScanPdfSample={handleScanPdfSample}
         />
 
         {/* Notice Banner */}
@@ -253,6 +285,17 @@ function App() {
                 ACTIVE SESSION: {fileName} ({selectedPaths.size}/{activeEntries.length} SELECTED)
               </span>
               <div className="flex items-center gap-2">
+                {isComic && (
+                  <button
+                    type="button"
+                    onClick={() => setIsComicReaderOpen(true)}
+                    className="bg-signal/20 border border-signal/40 dark:text-stone text-graphite hover:bg-signal/30 inline-flex items-center gap-1 px-2.5 py-1 rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal font-semibold"
+                  >
+                    <BookOpen size={14} className="text-signal-dim dark:text-signal" />
+                    <span>Open Comic Reader ({comicInfo.totalPages} Pages)</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={() => setIsDiffModalOpen(true)}
@@ -299,6 +342,12 @@ function App() {
                 <p className="text-gray-600 dark:text-gray-300">{volumeReport.promptMessage}</p>
               </div>
             )}
+
+            {/* Thumbnail Grid for Image-Heavy Archives */}
+            <ThumbnailGrid
+              entries={activeEntries}
+              onPreviewImage={handlePreviewFile}
+            />
 
             {/* Interactive File Tree Hierarchy & Full-Text Instant Search */}
             <FileTree
@@ -416,6 +465,14 @@ function App() {
         isOpen={isQuickLookOpen}
         onClose={() => setIsQuickLookOpen(false)}
         file={quickLookFile}
+      />
+
+      {/* Comic Archive Reader View Modal */}
+      <ComicReaderModal
+        isOpen={isComicReaderOpen}
+        onClose={() => setIsComicReaderOpen(false)}
+        archiveName={fileName || 'comic.cbz'}
+        entries={activeEntries}
       />
     </div>
   );
