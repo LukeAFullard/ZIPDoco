@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Eye, FileText, FileSpreadsheet, Image as ImageIcon, Code, AlertTriangle, Download } from 'lucide-react';
+import { PdfViewer } from './PdfViewer';
 
 export interface QuickLookFile {
   name: string;
@@ -31,6 +32,7 @@ export const QuickLookModal: React.FC<QuickLookModalProps> = ({ isOpen, onClose,
   if (!isOpen || !file) return null;
 
   const extension = file.name.split('.').pop()?.toLowerCase() || '';
+  const isPdf = extension === 'pdf';
   const isImage = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(extension);
   const isCsv = extension === 'csv';
   const isMarkdown = extension === 'md' || extension === 'markdown';
@@ -101,8 +103,8 @@ export const QuickLookModal: React.FC<QuickLookModalProps> = ({ isOpen, onClose,
             {isImage && <ImageIcon size={18} className="text-signal-dim dark:text-signal shrink-0" />}
             {isCsv && <FileSpreadsheet size={18} className="text-signal-dim dark:text-signal shrink-0" />}
             {isCode && <Code size={18} className="text-signal-dim dark:text-signal shrink-0" />}
-            {isText && !isCsv && !isCode && <FileText size={18} className="text-signal-dim dark:text-signal shrink-0" />}
-            {!isText && !isImage && <Eye size={18} className="text-signal-dim dark:text-signal shrink-0" />}
+            {(isText || isPdf) && !isCsv && !isCode && <FileText size={18} className="text-signal-dim dark:text-signal shrink-0" />}
+            {!isText && !isImage && !isPdf && <Eye size={18} className="text-signal-dim dark:text-signal shrink-0" />}
 
             <div className="min-w-0">
               <h2 id="quick-look-title" className="text-sm font-semibold truncate">
@@ -156,8 +158,10 @@ export const QuickLookModal: React.FC<QuickLookModalProps> = ({ isOpen, onClose,
         </div>
 
         {/* Content Area */}
-        <div className="p-5 overflow-auto flex-1 bg-stone/30 dark:bg-ink/30 text-xs">
-          {isImage ? (
+        <div className="p-5 overflow-auto flex-1 bg-stone/30 dark:bg-ink/30 text-xs flex flex-col">
+          {isPdf ? (
+            <PdfViewer fileName={file.name} content={file.content} />
+          ) : isImage ? (
             <div className="flex flex-col items-center justify-center min-h-[250px] p-4 bg-gray-100/50 dark:bg-ink/50 rounded-panel border border-graphite/10 dark:border-white/10">
               {typeof file.content === 'string' && file.content.startsWith('data:image') ? (
                 <img src={file.content} alt={file.name} className="max-h-[400px] object-contain rounded shadow-sm" />

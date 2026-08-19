@@ -156,8 +156,8 @@ requirement, not a later optimization.
   - [x] Build image preview modal (`png`, `jpg`, `gif`, `webp`).
 - [x] **2.1.3 Syntax Highlighting Component**
   - [x] Integrate lightweight syntax highlighter (Prism/Shiki lazy-loaded) for source files (`.py`, `.js`, `.ts`, `.go`, `.rs`, `.java`).
-- [ ] **2.1.4 Wasm PDF Renderer Integration**
-  - [ ] Integrate pdf.js / Wasm PDF renderer for in-browser PDF previews.
+- [x] **2.1.4 Wasm PDF Renderer Integration**
+  - [x] Integrate pdf.js / Wasm PDF renderer for in-browser PDF previews.
 
 #### 2.2 Selective Extraction
 - [x] **2.2.1 Virtualized File Tree Component**
@@ -242,11 +242,11 @@ requirement, not a later optimization.
   - [x] Add Service Worker `fetch` intercept for incoming share POST data and pass file handles to UI.
 
 #### 4.3 Thumbnail Grid & Comic Reader View
-- [ ] **4.3.1 Lazy Canvas Thumbnail Generator**
-  - [ ] Detect image-heavy archives (>50% image entries) and render virtualized thumbnail grid.
-  - [ ] Generate low-res image thumbnails on demand using HTML Canvas downscaling.
-- [ ] **4.3.2 Comic Archive Reader (CBR/CBZ)**
-  - [ ] Recognize CBR/CBZ extensions and provide paginated reader interface.
+- [x] **4.3.1 Lazy Canvas Thumbnail Generator**
+  - [x] Detect image-heavy archives (>50% image entries) and render virtualized thumbnail grid.
+  - [x] Generate low-res image thumbnails on demand using HTML Canvas downscaling.
+- [x] **4.3.2 Comic Archive Reader (CBR/CBZ)**
+  - [x] Recognize CBR/CBZ extensions and provide paginated reader interface.
 
 #### 4.4 Full-Text Search Inside Archive
 - [x] **4.4.1 Client-Side Inverted Text Indexer**
