@@ -167,12 +167,12 @@ requirement, not a later optimization.
   - [ ] Connect "Extract Selected" action to stream chosen files directly to OPFS / browser download.
 
 #### 2.3 Mojibake Repair
-- [ ] **2.3.1 Character Set Detector Integration**
-  - [ ] Integrate character encoding detector (Shift-JIS, GBK, Windows-1252 detection).
-- [ ] **2.3.2 Filename & Text Normalization**
-  - [ ] Implement UTF-8 string conversion for detected non-UTF8 filename byte sequences.
-- [ ] **2.3.3 Before/After Diff Confirmation UI**
-  - [ ] Build interactive diff UI displaying original vs repaired filenames before user confirmation.
+- [x] **2.3.1 Character Set Detector Integration**
+  - [x] Integrate character encoding detector (Shift-JIS, GBK, Windows-1252 detection).
+- [x] **2.3.2 Filename & Text Normalization**
+  - [x] Implement UTF-8 string conversion for detected non-UTF8 filename byte sequences.
+- [x] **2.3.3 Before/After Diff Confirmation UI**
+  - [x] Build interactive diff UI displaying original vs repaired filenames before user confirmation.
 
 #### 2.4 Spoofer Shield
 - [x] **2.4.1 Bidi & RTLO Character Detector**
@@ -219,11 +219,11 @@ requirement, not a later optimization.
   - [ ] Render two-column highlighted text diff view.
 
 #### 3.4 Exportable Audit Report
-- [ ] **3.4.1 Audit Summary Data Schema**
-  - [ ] Define versioned JSON schema capturing file counts, safety flags, entropy findings, SHA-256 manifests.
-- [ ] **3.4.2 JSON & Human-Readable PDF Exporters**
-  - [ ] Add machine-readable `.json` audit report exporter.
-  - [ ] Add styled printable `.pdf` audit report generator.
+- [x] **3.4.1 Audit Summary Data Schema**
+  - [x] Define versioned JSON schema capturing file counts, safety flags, entropy findings, SHA-256 manifests.
+- [x] **3.4.2 JSON & Human-Readable PDF Exporters**
+  - [x] Add machine-readable `.json` audit report exporter.
+  - [x] Add styled printable `.pdf` audit report generator.
 
 ---
 
