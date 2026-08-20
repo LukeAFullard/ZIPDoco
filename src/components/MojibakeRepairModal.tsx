@@ -68,7 +68,7 @@ export function MojibakeRepairModal({
       aria-modal="true"
       aria-labelledby="mojibake-modal-title"
     >
-      <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 shadow-lg w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/20 shadow-lg dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-graphite/10 dark:border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -88,7 +88,7 @@ export function MojibakeRepairModal({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="p-1.5 rounded-panel text-gray-500 hover:text-graphite dark:hover:text-stone hover:bg-gray-200/50 dark:hover:bg-ink/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            className="p-1.5 rounded-panel text-gray-500 hover:text-graphite dark:hover:text-stone hover:bg-gray-200/50 dark:hover:bg-ink/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
           >
             <X size={18} />
           </button>
@@ -163,7 +163,7 @@ export function MojibakeRepairModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 text-xs font-medium rounded-panel bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/15 dark:hover:bg-gray-800 text-graphite transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+              className="px-3.5 py-2 text-xs font-medium rounded-panel bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/20 dark:hover:bg-gray-800 text-graphite transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
             >
               Cancel
             </button>
@@ -171,7 +171,7 @@ export function MojibakeRepairModal({
               type="button"
               onClick={handleApply}
               disabled={selectedNames.size === 0}
-              className="px-4 py-2 text-xs font-medium rounded-panel bg-graphite hover:bg-ink dark:bg-stone dark:hover:bg-gray-300 text-stone dark:text-ink inline-flex items-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-xs font-medium rounded-panel bg-graphite hover:bg-ink dark:bg-stone dark:hover:bg-gray-300 text-stone dark:text-ink inline-flex items-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Check size={14} />
               <span>Apply {selectedNames.size} Repair(s)</span>

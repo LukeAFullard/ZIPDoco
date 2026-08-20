@@ -25,7 +25,7 @@ export const SafetySummaryPanel: React.FC<SafetySummaryPanelProps> = ({ reports,
     : 'safe';
 
   return (
-    <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 shadow-sm p-5 transition-colors">
+    <div className="bg-white dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/20 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 transition-colors">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {overallStatus === 'safe' && (
@@ -57,7 +57,7 @@ export const SafetySummaryPanel: React.FC<SafetySummaryPanelProps> = ({ reports,
                   onMouseLeave={() => setShowTooltip(false)}
                   onFocus={() => setShowTooltip(true)}
                   onBlur={() => setShowTooltip(false)}
-                  className="text-graphite/40 dark:text-stone/40 hover:text-signal-dim dark:hover:text-signal focus:outline-none focus-visible:ring-2 focus-visible:ring-signal rounded-full transition-colors"
+                  className="text-graphite/40 dark:text-stone/40 hover:text-signal-dim dark:hover:text-signal focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2 rounded-full transition-colors"
                 >
                   <HelpCircle size={15} />
                 </button>
@@ -82,7 +82,7 @@ export const SafetySummaryPanel: React.FC<SafetySummaryPanelProps> = ({ reports,
             onClick={() => setIsExpanded(!isExpanded)}
             aria-expanded={isExpanded}
             aria-label={isExpanded ? 'Collapse security details' : 'Expand security details'}
-            className="p-1.5 rounded-panel text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            className="p-1.5 rounded-panel text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
           >
             {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </button>

@@ -40,7 +40,7 @@ export function AuditReportModal({ isOpen, onClose, report }: AuditReportModalPr
       aria-modal="true"
       aria-labelledby="audit-modal-title"
     >
-      <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 shadow-lg w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/20 shadow-lg dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-graphite/10 dark:border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -60,7 +60,7 @@ export function AuditReportModal({ isOpen, onClose, report }: AuditReportModalPr
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="p-1.5 rounded-panel text-gray-500 hover:text-graphite dark:hover:text-stone hover:bg-gray-200/50 dark:hover:bg-ink/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            className="p-1.5 rounded-panel text-gray-500 hover:text-graphite dark:hover:text-stone hover:bg-gray-200/50 dark:hover:bg-ink/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
           >
             <X size={18} />
           </button>
@@ -206,7 +206,7 @@ export function AuditReportModal({ isOpen, onClose, report }: AuditReportModalPr
           <button
             type="button"
             onClick={handlePrint}
-            className="px-3.5 py-2 text-xs font-medium rounded-panel bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/15 dark:hover:bg-gray-800 text-graphite inline-flex items-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            className="px-3.5 py-2 text-xs font-medium rounded-panel bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/20 dark:hover:bg-gray-800 text-graphite inline-flex items-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
           >
             <Printer size={14} />
             <span>Print Report</span>
@@ -216,14 +216,14 @@ export function AuditReportModal({ isOpen, onClose, report }: AuditReportModalPr
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 text-xs font-medium rounded-panel bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/15 dark:hover:bg-gray-800 text-graphite transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+              className="px-3.5 py-2 text-xs font-medium rounded-panel bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/20 dark:hover:bg-gray-800 text-graphite transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
             >
               Close
             </button>
             <button
               type="button"
               onClick={handleDownloadJSON}
-              className="px-4 py-2 text-xs font-medium rounded-panel bg-graphite hover:bg-ink dark:bg-stone dark:hover:bg-gray-300 text-stone dark:text-ink inline-flex items-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+              className="px-4 py-2 text-xs font-medium rounded-panel bg-graphite hover:bg-ink dark:bg-stone dark:hover:bg-gray-300 text-stone dark:text-ink inline-flex items-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
             >
               <Download size={14} />
               <span>Export Audit JSON</span>

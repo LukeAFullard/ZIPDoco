@@ -96,7 +96,7 @@ export const QuickLookModal: React.FC<QuickLookModalProps> = ({ isOpen, onClose,
       aria-labelledby="quick-look-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 backdrop-blur-xs"
     >
-      <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden text-graphite dark:text-stone">
+      <div className="bg-white dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/20 shadow-xl dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden text-graphite dark:text-stone">
         {/* Header */}
         <div className="px-5 py-4 border-b border-graphite/15 dark:border-white/10 flex items-center justify-between bg-stone/50 dark:bg-graphite/50">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -141,7 +141,7 @@ export const QuickLookModal: React.FC<QuickLookModalProps> = ({ isOpen, onClose,
               onClick={handleDownload}
               title="Download entry"
               aria-label="Download entry"
-              className="p-1.5 rounded-panel hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+              className="p-1.5 rounded-panel hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
             >
               <Download size={16} />
             </button>
@@ -150,7 +150,7 @@ export const QuickLookModal: React.FC<QuickLookModalProps> = ({ isOpen, onClose,
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="p-1.5 rounded-panel hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+              className="p-1.5 rounded-panel hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
             >
               <X size={18} />
             </button>
@@ -225,7 +225,7 @@ export const QuickLookModal: React.FC<QuickLookModalProps> = ({ isOpen, onClose,
               <button
                 type="button"
                 onClick={handleDownload}
-                className="bg-graphite hover:bg-ink dark:bg-stone dark:hover:bg-gray-300 text-stone dark:text-ink inline-flex items-center gap-1.5 px-3 py-1.5 rounded-panel text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                className="bg-graphite hover:bg-ink dark:bg-stone dark:hover:bg-gray-300 text-stone dark:text-ink inline-flex items-center gap-1.5 px-3 py-1.5 rounded-panel text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
               >
                 <Download size={14} />
                 <span>Download Entry File</span>
@@ -239,7 +239,7 @@ export const QuickLookModal: React.FC<QuickLookModalProps> = ({ isOpen, onClose,
           <button
             type="button"
             onClick={onClose}
-            className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/15 dark:hover:bg-gray-800 text-graphite px-4 py-1.5 rounded-panel text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/20 dark:hover:bg-gray-800 text-graphite px-4 py-1.5 rounded-panel text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
           >
             Close
           </button>

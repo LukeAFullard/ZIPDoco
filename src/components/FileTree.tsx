@@ -219,7 +219,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
   const allSelected = allFilePaths.length > 0 && allFilePaths.every(p => selectedPaths.has(p));
 
   return (
-    <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 p-4 space-y-3">
+    <div className="bg-white dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/20 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-4 space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-graphite/10 dark:border-white/10 text-xs">
         <div className="flex items-center gap-2 font-semibold text-graphite dark:text-stone">
           <Folder size={16} className="text-signal-dim dark:text-signal" />
@@ -244,7 +244,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Instant full-text search inside archive entries..."
-            className="w-full pl-8 pr-3 py-1.5 border border-graphite/20 dark:border-white/15 rounded-panel bg-stone dark:bg-ink text-xs text-graphite dark:text-stone placeholder:text-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            className="w-full pl-8 pr-3 py-1.5 border border-graphite/20 dark:border-white/20 rounded-panel bg-white dark:bg-graphite text-xs text-graphite dark:text-stone placeholder:text-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
           />
         </div>
 

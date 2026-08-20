@@ -54,7 +54,7 @@ export const ThumbnailGrid: React.FC<ThumbnailGridProps> = ({
   }
 
   return (
-    <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 p-4 space-y-3">
+    <div className="bg-white dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/20 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-4 space-y-3">
       <div className="flex items-center justify-between text-xs font-semibold text-graphite dark:text-stone">
         <div className="flex items-center gap-2">
           <Grid size={16} className="text-signal-dim dark:text-signal" />
@@ -74,7 +74,7 @@ export const ThumbnailGrid: React.FC<ThumbnailGridProps> = ({
             <div
               key={entry.name}
               onClick={() => onPreviewImage(entry.name)}
-              className="group relative bg-stone dark:bg-ink rounded-panel border border-graphite/20 dark:border-white/15 overflow-hidden cursor-pointer hover:border-signal/50 transition-all flex flex-col"
+              className="group relative bg-stone dark:bg-ink rounded-panel border border-graphite/20 dark:border-white/20 overflow-hidden cursor-pointer hover:border-signal/50 transition-all flex flex-col"
             >
               <div className="aspect-square bg-gray-200/50 dark:bg-graphite flex items-center justify-center overflow-hidden relative">
                 {thumb ? (

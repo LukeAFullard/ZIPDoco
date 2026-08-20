@@ -89,10 +89,10 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`relative rounded-panel border-2 border-dashed p-6 sm:p-8 text-center transition-all duration-200 ${
+      className={`relative rounded-panel border-2 border-dashed p-6 sm:p-8 text-center transition-all duration-200 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ${
         isDragActive
           ? 'border-signal bg-signal/10 dark:bg-signal/15 scale-[1.01]'
-          : 'border-graphite/20 dark:border-white/20 bg-stone dark:bg-graphite hover:border-graphite/40 dark:hover:border-white/30'
+          : 'border-graphite/20 dark:border-white/20 bg-white dark:bg-graphite hover:border-graphite/40 dark:hover:border-white/30'
       }`}
     >
       <input
@@ -123,7 +123,7 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
           <button
             type="button"
             onClick={handleOpenFilePicker}
-            className="bg-graphite hover:bg-ink dark:bg-stone dark:hover:bg-gray-300 text-stone dark:text-ink inline-flex items-center justify-center font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 px-3.5 py-1.5 text-xs shadow-sm"
+            className="bg-graphite hover:bg-ink dark:bg-stone dark:hover:bg-gray-300 text-stone dark:text-ink inline-flex items-center justify-center font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2 px-3.5 py-1.5 text-xs shadow-sm"
           >
             Select Archives
           </button>
@@ -131,7 +131,7 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
           <button
             type="button"
             onClick={onScanSample}
-            className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/15 dark:hover:bg-gray-800 text-graphite inline-flex items-center gap-1 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal px-3 py-1.5 text-xs"
+            className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/20 dark:hover:bg-gray-800 text-graphite inline-flex items-center gap-1 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2 px-3 py-1.5 text-xs"
           >
             <RefreshCw size={13} />
             <span>Sample Security Scan</span>
@@ -141,7 +141,7 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
             <button
               type="button"
               onClick={onScanComicSample}
-              className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/15 dark:hover:bg-gray-800 text-graphite inline-flex items-center gap-1 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal px-3 py-1.5 text-xs"
+              className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/20 dark:hover:bg-gray-800 text-graphite inline-flex items-center gap-1 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2 px-3 py-1.5 text-xs"
             >
               <BookOpen size={13} className="text-signal-dim dark:text-signal" />
               <span>Comic (CBZ/CBR) Sample</span>
@@ -152,7 +152,7 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
             <button
               type="button"
               onClick={onScanPdfSample}
-              className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/15 dark:hover:bg-gray-800 text-graphite inline-flex items-center gap-1 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal px-3 py-1.5 text-xs"
+              className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/20 dark:hover:bg-gray-800 text-graphite inline-flex items-center gap-1 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2 px-3 py-1.5 text-xs"
             >
               <FileText size={13} className="text-signal-dim dark:text-signal" />
               <span>PDF Document Sample</span>
@@ -162,7 +162,7 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
           <button
             type="button"
             onClick={onTriggerBombSample}
-            className="bg-stone border border-rust/30 hover:bg-rust/10 dark:bg-graphite dark:border-rust/40 text-rust inline-flex items-center gap-1 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal px-3 py-1.5 text-xs"
+            className="bg-stone border border-rust/30 hover:bg-rust/10 dark:bg-graphite dark:border-rust/40 text-rust inline-flex items-center gap-1 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2 px-3 py-1.5 text-xs"
           >
             <ShieldCheck size={13} />
             <span>Simulate Zip Bomb</span>

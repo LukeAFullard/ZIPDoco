@@ -34,9 +34,9 @@ export const ArchiveDiffModal: React.FC<ArchiveDiffModalProps> = ({
       aria-modal="true"
       aria-labelledby="diff-modal-title"
     >
-      <div className="bg-stone dark:bg-graphite text-graphite dark:text-stone rounded-panel border border-graphite/20 dark:border-white/15 shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white dark:bg-graphite text-graphite dark:text-stone rounded-panel border border-graphite/20 dark:border-white/20 shadow-xl dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="p-4 border-b border-graphite/20 dark:border-white/15 flex items-center justify-between">
+        <div className="p-4 border-b border-graphite/20 dark:border-white/20 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <GitCompare size={20} className="text-signal-dim dark:text-signal" />
             <h2 id="diff-modal-title" className="text-lg font-semibold">
@@ -47,7 +47,7 @@ export const ArchiveDiffModal: React.FC<ArchiveDiffModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="text-gray-500 hover:text-graphite dark:hover:text-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-signal rounded-panel p-1"
+            className="text-gray-500 hover:text-graphite dark:hover:text-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2 rounded-panel p-1"
           >
             <X size={20} />
           </button>
@@ -93,7 +93,7 @@ export const ArchiveDiffModal: React.FC<ArchiveDiffModalProps> = ({
           {/* Dual Pane View */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* List of File Diffs */}
-            <div className="border border-graphite/20 dark:border-white/15 rounded-panel p-3 space-y-2 bg-stone dark:bg-ink/40 max-h-[320px] overflow-y-auto">
+            <div className="border border-graphite/20 dark:border-white/20 rounded-panel p-3 space-y-2 bg-stone dark:bg-ink/40 max-h-[320px] overflow-y-auto">
               <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                 Changed File Tree ({summary.diffs.length})
               </h3>
@@ -131,7 +131,7 @@ export const ArchiveDiffModal: React.FC<ArchiveDiffModalProps> = ({
             </div>
 
             {/* Selected File Line-Level Diff Inspector */}
-            <div className="border border-graphite/20 dark:border-white/15 rounded-panel p-3 space-y-2 bg-stone dark:bg-ink/40 max-h-[320px] overflow-y-auto font-mono text-xs">
+            <div className="border border-graphite/20 dark:border-white/20 rounded-panel p-3 space-y-2 bg-stone dark:bg-ink/40 max-h-[320px] overflow-y-auto font-mono text-xs">
               <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1.5">
                 <FileText size={14} />
                 Line Diff Inspector
@@ -189,11 +189,11 @@ export const ArchiveDiffModal: React.FC<ArchiveDiffModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-graphite/20 dark:border-white/15 flex justify-end">
+        <div className="p-4 border-t border-graphite/20 dark:border-white/20 flex justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="bg-graphite text-stone dark:bg-stone dark:text-ink hover:bg-ink dark:hover:bg-gray-200 px-4 py-2 rounded-panel font-medium text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            className="bg-graphite text-stone dark:bg-stone dark:text-ink hover:bg-ink dark:hover:bg-gray-200 px-4 py-2 rounded-panel font-medium text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
           >
             Done
           </button>
