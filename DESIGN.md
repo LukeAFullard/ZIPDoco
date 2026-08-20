@@ -37,7 +37,7 @@ colors: {
 | Role | Light mode | Dark mode |
 |---|---|---|
 | Page background | `bg-stone` | `dark:bg-ink` |
-| Raised surface (card/panel/modal) | `bg-stone` | `dark:bg-graphite` — deliberately *different* from the page bg so cards read as raised in dark mode |
+| Raised surface (card/panel/modal) | `bg-white` | `dark:bg-graphite` — deliberately *different* from the page bg (`bg-stone` light / `dark:bg-ink` dark) so cards read as raised off the page in both themes |
 | Primary text | `text-graphite` / `text-gray-900` | `dark:text-stone` / `dark:text-gray-100` |
 | Secondary/muted text | `text-gray-500` | `dark:text-gray-400` |
 | Primary accent (active states, links, focus rings) | `text-signal-dim` (text/icons — `signal` itself fails contrast on light backgrounds, see note below) | `dark:text-signal` |
@@ -47,9 +47,11 @@ colors: {
 
 **Contrast note, learned the hard way:** `signal` (#D9A54A) has a contrast ratio of only ~1.9:1 against `stone` and ~2.2:1 against white — it fails WCAG AA for text on light backgrounds even though it looks fine to the eye. Use `signal-dim` (#8A6A2F, ~4.4–5:1) for any *text or icon* use of the accent color in light mode. `signal` itself is reserved for: dark-mode text (8.2:1, passes easily), backgrounds/fills, borders, and focus rings (UI-component contrast only needs 3:1, which `signal` clears).
 
+Icon/text drawn *on* a `bg-signal` fill now uses `text-ink`, not white — white-on-signal measures ~2.2:1 and fails even the 3:1 UI-component threshold.
+
 ### Never use directly
 - Tailwind's default `blue-*` as a primary/brand color anywhere.
-- Pure `#000000` / `#FFFFFF` — always the warm `ink`/`stone` pair instead.
+- Pure `#000000` / `#FFFFFF` — always the warm `ink`/`stone` pair instead (except for raised surfaces in light mode using `bg-white`).
 
 ---
 
@@ -96,12 +98,17 @@ fontFamily: {
 
 ```tsx
 // the shared Panel primitive — this is the canonical "card" look
-<div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 shadow-sm">
+<div className="bg-white dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/20 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
 ```
 
-  Note the border opacity is tuned deliberately (20% light / 15% dark) — subtle enough to feel calm, strong enough to actually read as an edge. An earlier version used 10% and it was genuinely too faint to see; don't go below ~20/15.
+  Note the border opacity is tuned deliberately (20% light / 20% dark) — subtle enough to feel calm, strong enough to actually read as an edge. Dark-mode border opacity was raised from 15% to 20% everywhere for improved definition.
 
-- **Inset vs. outset shadow matters.** `shadow-inner` makes an element recede (used sparingly, e.g. the tab-bar's pill background). `shadow-sm` (outer) makes it lift slightly — that's the default for cards. Don't use a heavy `shadow-lg`/`shadow-xl` anywhere; the whole palette is about restraint.
+- **Inset vs. outset shadow matters.** `shadow-inner` makes an element recede (used sparingly, e.g. the tab-bar's pill background). `shadow-sm` (outer) makes it lift slightly — that's the default for cards in light mode.
+- **Dark-mode top-inset highlight:** `shadow-sm` alone doesn't render effectively on dark surfaces, so a top-inset highlight has been introduced:
+```tsx
+dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]
+```
+  Paired with `shadow-sm` for light mode. Currently applied on the `Panel` primitive and the active-timer card.
 - **Page layout:** centered column, `max-w-3xl` for normal content, wider (`max-w-5xl`) only for data-dense views (tables/matrices) — and the page-level width constraint must actually be lifted for those views, not just requested and then clipped by a narrower parent.
 - **Vertical rhythm:** major sections separated by `mt-8`/`mb-8`, not by relying on child components' own incidental margins — be explicit about spacing between siblings.
 
@@ -118,30 +125,32 @@ Four variants, two of which invert light/dark rather than just fading:
 'bg-graphite hover:bg-ink dark:bg-stone dark:hover:bg-gray-300 text-stone dark:text-ink'
 
 // secondary — default, most buttons are this
-'bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/15 dark:hover:bg-gray-800 text-graphite'
+'bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/20 dark:hover:bg-gray-800 text-graphite'
 
-// danger — destructive actions only
-'bg-red-600 hover:bg-red-700 text-white'
-// (note: this is the one spot that still uses a stock Tailwind red rather than `rust` —
-//  worth reconciling to `bg-rust hover:bg-rust/90` for full palette consistency)
+// danger — destructive actions only (settled with rust accent)
+'bg-rust hover:bg-rust/90 text-white'
 
 // ghost — lowest emphasis, icon buttons, toolbar actions
 'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
 ```
 
-All variants share: `inline-flex items-center justify-center font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed`
+All variants share: `inline-flex items-center justify-center font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-stone dark:ring-offset-graphite focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed`
 
 ### Input
 
 ```tsx
-'w-full px-3 py-2 border border-graphite/20 dark:border-white/15 rounded-panel bg-stone dark:bg-ink text-graphite dark:text-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 transition-colors'
+'w-full px-3 py-2 border border-graphite/20 dark:border-white/20 rounded-panel bg-white dark:bg-graphite text-graphite dark:text-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-stone dark:ring-offset-graphite focus-visible:ring-offset-2 transition-colors'
 ```
 
-Note inputs sit on `bg-ink` in dark mode (page-level tone), while Panels sit on `bg-graphite` (raised tone) — inputs read as "cut into" the surface, cards read as "raised off" it. Small distinction, deliberate.
+Inputs use `bg-white dark:bg-graphite`, sharing the standard raised-surface treatment with Panel.
 
 ### Focus ring — universal, non-negotiable
 
 Every interactive element gets the same focus treatment: `focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2`. One accent color for every focus indicator in the app, always `focus-visible` (not `focus`) so it only appears for keyboard navigation, not mouse clicks.
+
+`ring-offset-2` is paired with an explicit, theme- and surface-aware offset color rather than defaulting to Tailwind's white:
+- Controls on a raised surface (Button, Input): `ring-offset-stone dark:ring-offset-graphite`
+- Controls on the page itself (e.g. tab bar): `ring-offset-stone dark:ring-offset-ink`
 
 ### Tooltip (contextual help, not decoration)
 
@@ -212,12 +221,12 @@ This palette and component set is only "on-brand" if it's also accessible — tr
 
 ## 10. Quick Reference — Starting a New Component
 
-1. Background: `bg-stone dark:bg-graphite` if it's a raised surface, `bg-stone dark:bg-ink` if it's page-level.
-2. Border: `border border-graphite/20 dark:border-white/15`.
+1. Background: `bg-white dark:bg-graphite` if it's a raised surface, `bg-stone dark:bg-ink` if it's page-level.
+2. Border: `border border-graphite/20 dark:border-white/20`.
 3. Radius: `rounded-panel`.
 4. Text: `text-graphite dark:text-stone` primary, `text-gray-500 dark:text-gray-400` secondary.
 5. Any accent needed: `signal`/`signal-dim` (primary), `verdigris` (positive), `rust` (destructive) — never a stock Tailwind color.
 6. Numbers: `font-mono tabular`.
-7. Focus: `focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2` on everything interactive.
+7. Focus: `focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2` (paired with appropriate surface `ring-offset-*` color) on everything interactive.
 8. Icons: `lucide-react`, accessible name on anything icon-only.
 9. Motion: `transition-colors` and nothing louder, unless it's communicating genuinely live/active state.
