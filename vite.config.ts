@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import tailwindcss from '@tailwindcss/vite'
+import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -10,7 +11,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'sitemap.xml', 'robots.txt', 'llms.txt', 'og-image.png'],
       manifest: {
         name: 'ZIPDoco',
         short_name: 'ZIPDoco',
@@ -20,7 +21,7 @@ export default defineConfig({
         display: 'standalone',
         file_handlers: [
           {
-            action: '/',
+            action: '/app/',
             accept: {
               'application/zip': ['.zip'],
               'application/x-rar-compressed': ['.rar'],
@@ -33,7 +34,7 @@ export default defineConfig({
           }
         ],
         share_target: {
-          action: '/share-target',
+          action: '/app/share-target',
           method: 'POST',
           enctype: 'multipart/form-data',
           params: {
@@ -88,4 +89,16 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(import.meta.dirname, 'index.html'),
+        app: resolve(import.meta.dirname, 'app/index.html'),
+        faq: resolve(import.meta.dirname, 'faq/index.html'),
+        blog: resolve(import.meta.dirname, 'blog/index.html'),
+        privacy: resolve(import.meta.dirname, 'privacy/index.html'),
+        terms: resolve(import.meta.dirname, 'terms/index.html'),
+      }
+    }
+  }
 })

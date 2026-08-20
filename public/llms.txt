@@ -1,0 +1,12 @@
+# ZIPDoco
+
+> Safe intake tool for untrusted archives — 100% client-side PWA for inspecting, sanitizing, and transposing archives without server processing.
+
+## Pages
+
+- `/` - ZIPDoco front page introducing the safe intake solution, features, comparison, and app entry point.
+- `/app/` - The main application workspace for opening archives, inspecting entries, scanning for zip bombs/slips/leaks, and repacking.
+- `/faq/` - Frequently asked questions about client-side WebAssembly security, supported formats (RAR, 7z, TAR, ZIP), and privacy guarantees.
+- `/blog/` - Technical guides and articles on archive security, Zip Bomb detection, and local-first software.
+- `/privacy/` - Privacy policy confirming zero network telemetry, zero server-side storage, and 100% local operation.
+- `/terms/` - Terms of use for ZIPDoco software.

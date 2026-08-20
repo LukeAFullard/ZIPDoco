@@ -6,10 +6,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#EEF0EC" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#10161C" media="(prefers-color-scheme: dark)" />
-    <title>ZIPDoco</title>
+
+    <!-- Primary Meta Tags -->
+    <title>ZIPDoco — Safe Intake Tool for Untrusted Archives</title>
+    <meta name="title" content="ZIPDoco — Safe Intake Tool for Untrusted Archives" />
+    <meta name="description" content="Open, inspect, and sanitize untrusted RAR, 7z, TAR, and ZIP archives with 100% local WebAssembly. Zero network calls, zero server processing." />
+    <link rel="canonical" href="https://zipdoco.app/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://zipdoco.app/" />
+    <meta property="og:title" content="ZIPDoco — Safe Intake Tool for Untrusted Archives" />
+    <meta property="og:description" content="Open, inspect, and sanitize untrusted RAR, 7z, TAR, and ZIP archives with 100% local WebAssembly. Zero network calls, zero server processing." />
+    <meta property="og:image" content="https://zipdoco.app/og-image.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://zipdoco.app/" />
+    <meta property="twitter:title" content="ZIPDoco — Safe Intake Tool for Untrusted Archives" />
+    <meta property="twitter:description" content="Open, inspect, and sanitize untrusted RAR, 7z, TAR, and ZIP archives with 100% local WebAssembly. Zero network calls, zero server processing." />
+    <meta property="twitter:image" content="https://zipdoco.app/og-image.png" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "ZIPDoco",
+        "url": "https://zipdoco.app/",
+        "description": "Safe intake tool for untrusted archives — inspect, sanitize, and transpose RAR, 7z, TAR, and ZIP files using client-side WebAssembly.",
+        "applicationCategory": "SecurityApplication",
+        "operatingSystem": "All"
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/entry.tsx"></script>
   </body>
 </html>
