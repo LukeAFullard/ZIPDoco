@@ -247,7 +247,7 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-stone dark:bg-ink text-graphite dark:text-stone font-sans transition-colors">
-      <header className="border-b border-graphite/20 dark:border-white/15 bg-stone dark:bg-graphite">
+      <header className="border-b border-graphite/20 dark:border-white/20 bg-stone dark:bg-graphite">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Archive size={24} className="text-signal-dim dark:text-signal" />
@@ -289,7 +289,7 @@ function App() {
                   <button
                     type="button"
                     onClick={() => setIsComicReaderOpen(true)}
-                    className="bg-signal/20 border border-signal/40 dark:text-stone text-graphite hover:bg-signal/30 inline-flex items-center gap-1 px-2.5 py-1 rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal font-semibold"
+                    className="bg-signal/20 border border-signal/40 dark:text-stone text-graphite hover:bg-signal/30 inline-flex items-center gap-1 px-2.5 py-1 rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-stone dark:ring-offset-ink focus-visible:ring-offset-2 font-semibold"
                   >
                     <BookOpen size={14} className="text-signal-dim dark:text-signal" />
                     <span>Open Comic Reader ({comicInfo.totalPages} Pages)</span>
@@ -299,7 +299,7 @@ function App() {
                 <button
                   type="button"
                   onClick={() => setIsDiffModalOpen(true)}
-                  className="bg-stone border border-graphite/20 dark:bg-graphite dark:border-white/15 dark:text-stone text-graphite hover:bg-gray-100 dark:hover:bg-gray-800 inline-flex items-center gap-1 px-2.5 py-1 rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  className="bg-stone border border-graphite/20 dark:bg-graphite dark:border-white/20 dark:text-stone text-graphite hover:bg-gray-100 dark:hover:bg-gray-800 inline-flex items-center gap-1 px-2.5 py-1 rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-stone dark:ring-offset-ink focus-visible:ring-offset-2"
                 >
                   <GitCompare size={14} className="text-signal-dim dark:text-signal" />
                   <span>Archive Diff</span>
@@ -308,7 +308,7 @@ function App() {
                 <button
                   type="button"
                   onClick={() => setIsAuditModalOpen(true)}
-                  className="bg-stone border border-graphite/20 dark:bg-graphite dark:border-white/15 dark:text-stone text-graphite hover:bg-gray-100 dark:hover:bg-gray-800 inline-flex items-center gap-1 px-2.5 py-1 rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  className="bg-stone border border-graphite/20 dark:bg-graphite dark:border-white/20 dark:text-stone text-graphite hover:bg-gray-100 dark:hover:bg-gray-800 inline-flex items-center gap-1 px-2.5 py-1 rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-stone dark:ring-offset-ink focus-visible:ring-offset-2"
                 >
                   <FileText size={14} className="text-signal-dim dark:text-signal" />
                   <span>Export Audit Report</span>
@@ -318,7 +318,7 @@ function App() {
 
             {/* Batch Consolidator Summary Banner */}
             {batchReport && (
-              <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 p-3 text-xs flex items-center justify-between">
+              <div className="bg-white dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/20 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-3 text-xs flex items-center justify-between">
                 <div className="flex items-center gap-2 font-mono">
                   <Boxes size={16} className="text-signal-dim dark:text-signal" />
                   <span>Batch Queue Consolidation: {batchReport.uniqueEntriesCount} Unique / {batchReport.duplicateEntriesCount} Duplicate File(s)</span>
@@ -334,7 +334,7 @@ function App() {
 
             {/* Multi-Volume Report */}
             {volumeReport && volumeReport.isMultiVolumeSet && (
-              <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 p-4 space-y-2 text-xs">
+              <div className="bg-white dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/20 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-4 space-y-2 text-xs">
                 <div className="flex items-center gap-2 font-semibold text-graphite dark:text-stone">
                   <Layers size={16} className="text-signal-dim dark:text-signal" />
                   <span>Multi-Volume Archive Set ({volumeReport.format?.toUpperCase()})</span>
@@ -361,7 +361,7 @@ function App() {
 
             {/* Mojibake Repair Banner */}
             {mangledEntries.length > 0 && (
-              <div className="bg-stone dark:bg-graphite rounded-panel border border-signal/40 p-4 space-y-3 text-xs">
+              <div className="bg-white dark:bg-graphite rounded-panel border border-signal/40 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-4 space-y-3 text-xs">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 font-semibold text-signal-dim dark:text-signal">
                     <Languages size={16} />
@@ -370,7 +370,7 @@ function App() {
                   <button
                     type="button"
                     onClick={() => setIsMojibakeModalOpen(true)}
-                    className="bg-signal/20 hover:bg-signal/30 text-graphite dark:text-stone inline-flex items-center gap-1.5 font-medium rounded-panel border border-signal/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal px-3 py-1.5 text-xs"
+                    className="bg-signal/20 hover:bg-signal/30 text-graphite dark:text-stone inline-flex items-center gap-1.5 font-medium rounded-panel border border-signal/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2 px-3 py-1.5 text-xs"
                   >
                     <Languages size={14} />
                     <span>Review &amp; Repair Names</span>
@@ -384,7 +384,7 @@ function App() {
 
             {/* Secret Leak Findings Summary */}
             {leakReports.length > 0 && (
-              <div className="bg-stone dark:bg-graphite rounded-panel border border-rust/30 p-4 space-y-3 text-xs">
+              <div className="bg-white dark:bg-graphite rounded-panel border border-rust/30 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-4 space-y-3 text-xs">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 font-semibold text-rust">
                     <KeyRound size={16} />
@@ -393,7 +393,7 @@ function App() {
                   <button
                     type="button"
                     onClick={() => setIsPurgeModalOpen(true)}
-                    className="bg-rust hover:bg-rust/90 text-white inline-flex items-center gap-1.5 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal px-3 py-1.5 text-xs"
+                    className="bg-rust hover:bg-rust/90 text-white inline-flex items-center gap-1.5 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2 px-3 py-1.5 text-xs"
                   >
                     <Trash2 size={14} />
                     <span>Review &amp; Purge Secrets</span>
@@ -420,7 +420,7 @@ function App() {
         )}
 
         {!hasScanned && (
-          <div className="bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 p-4 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+          <div className="bg-white dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/20 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-4 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
             <ShieldCheck size={18} className="text-verdigris shrink-0" />
             <span>
               100% Client-Side Processing. Zero network calls are ever executed. Files stay inside browser WebAssembly memory and OPFS.

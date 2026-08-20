@@ -42,7 +42,7 @@ export const ZipBombWarningPanel: React.FC<ZipBombWarningPanelProps> = ({
 
   if (!isBombWarning) {
     return (
-      <div className="bg-stone dark:bg-graphite rounded-panel border border-verdigris/30 dark:border-verdigris/40 p-4 flex items-center gap-3 text-xs text-graphite dark:text-stone">
+      <div className="bg-white dark:bg-graphite rounded-panel border border-verdigris/30 dark:border-verdigris/40 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-4 flex items-center gap-3 text-xs text-graphite dark:text-stone">
         <CheckCircle2 size={18} className="text-verdigris shrink-0" />
         <span>
           Pre-flight expansion ratio pass: Global ratio is{' '}
@@ -55,7 +55,7 @@ export const ZipBombWarningPanel: React.FC<ZipBombWarningPanelProps> = ({
   return (
     <div
       role="alert"
-      className="bg-stone dark:bg-graphite rounded-panel border border-rust/40 dark:border-rust/50 shadow-sm p-5 space-y-4 text-graphite dark:text-stone transition-colors"
+      className="bg-white dark:bg-graphite rounded-panel border border-rust/40 dark:border-rust/50 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 space-y-4 text-graphite dark:text-stone transition-colors"
     >
       <div className="flex items-start gap-3">
         <div className="p-2.5 rounded-full bg-rust/15 text-rust shrink-0 mt-0.5">
@@ -119,7 +119,7 @@ export const ZipBombWarningPanel: React.FC<ZipBombWarningPanelProps> = ({
                 <button
                   type="button"
                   onClick={onAbort}
-                  className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/15 dark:hover:bg-gray-800 text-graphite inline-flex items-center gap-1.5 font-medium rounded-panel px-3.5 py-2 text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2"
+                  className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/20 dark:hover:bg-gray-800 text-graphite inline-flex items-center gap-1.5 font-medium rounded-panel px-3.5 py-2 text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
                 >
                   <XCircle size={14} />
                   <span>Abort Extraction</span>
@@ -129,7 +129,7 @@ export const ZipBombWarningPanel: React.FC<ZipBombWarningPanelProps> = ({
               <button
                 type="button"
                 onClick={handleOverride}
-                className="bg-rust hover:bg-rust/90 text-white inline-flex items-center gap-1.5 font-medium rounded-panel px-3.5 py-2 text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2"
+                className="bg-rust hover:bg-rust/90 text-white inline-flex items-center gap-1.5 font-medium rounded-panel px-3.5 py-2 text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
               >
                 <AlertTriangle size={14} />
                 <span>Override & Sequential Extract</span>

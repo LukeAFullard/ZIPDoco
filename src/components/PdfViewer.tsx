@@ -36,9 +36,9 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ fileName, content }) => {
   const simulatedTotalPages = 3;
 
   return (
-    <div className="flex flex-col h-full bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 overflow-hidden">
+    <div className="flex flex-col h-full bg-white dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/20 shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] overflow-hidden">
       {/* PDF Header Toolbar */}
-      <div className="p-2.5 border-b border-graphite/20 dark:border-white/15 flex flex-wrap items-center justify-between gap-2 bg-stone dark:bg-graphite text-xs">
+      <div className="p-2.5 border-b border-graphite/20 dark:border-white/20 flex flex-wrap items-center justify-between gap-2 bg-stone dark:bg-graphite text-xs">
         <div className="flex items-center gap-2 font-mono">
           <FileText size={16} className="text-signal-dim dark:text-signal" />
           <span className="font-semibold text-graphite dark:text-stone">{fileName}</span>
@@ -49,7 +49,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ fileName, content }) => {
 
         <div className="flex items-center gap-2">
           {/* View mode toggle */}
-          <div className="flex bg-stone dark:bg-ink rounded-panel border border-graphite/20 dark:border-white/15 p-0.5">
+          <div className="flex bg-stone dark:bg-ink rounded-panel border border-graphite/20 dark:border-white/20 p-0.5">
             <button
               type="button"
               onClick={() => setViewMode('preview')}
@@ -76,7 +76,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ fileName, content }) => {
 
           {/* Zoom controls */}
           {viewMode === 'preview' && (
-            <div className="flex items-center bg-stone dark:bg-ink rounded-panel border border-graphite/20 dark:border-white/15 p-0.5">
+            <div className="flex items-center bg-stone dark:bg-ink rounded-panel border border-graphite/20 dark:border-white/20 p-0.5">
               <button
                 type="button"
                 onClick={() => setZoomLevel(z => Math.max(50, z - 25))}
@@ -156,7 +156,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ fileName, content }) => {
             </div>
           )
         ) : (
-          <div className="w-full h-full p-4 bg-stone dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/15 overflow-auto">
+          <div className="w-full h-full p-4 bg-white dark:bg-graphite rounded-panel border border-graphite/20 dark:border-white/20 overflow-auto">
             <pre className="text-xs font-mono text-graphite dark:text-stone whitespace-pre-wrap">
               {textContent || '[No text stream extracted from PDF]'}
             </pre>
@@ -166,13 +166,13 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ fileName, content }) => {
 
       {/* PDF Footer Navigation */}
       {viewMode === 'preview' && !objectUrl && (
-        <div className="p-2 border-t border-graphite/20 dark:border-white/15 bg-stone dark:bg-graphite flex items-center justify-between text-xs shrink-0">
+        <div className="p-2 border-t border-graphite/20 dark:border-white/20 bg-stone dark:bg-graphite flex items-center justify-between text-xs shrink-0">
           <button
             type="button"
             onClick={() => setActivePage(p => Math.max(1, p - 1))}
             disabled={activePage === 1}
             aria-label="Previous PDF Page"
-            className="px-2.5 py-1 rounded border border-graphite/20 dark:border-white/15 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors inline-flex items-center gap-1"
+            className="px-2.5 py-1 rounded border border-graphite/20 dark:border-white/20 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors inline-flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
           >
             <ChevronLeft size={14} /> Previous
           </button>
@@ -186,7 +186,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ fileName, content }) => {
             onClick={() => setActivePage(p => Math.min(simulatedTotalPages, p + 1))}
             disabled={activePage === simulatedTotalPages}
             aria-label="Next PDF Page"
-            className="px-2.5 py-1 rounded border border-graphite/20 dark:border-white/15 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors inline-flex items-center gap-1"
+            className="px-2.5 py-1 rounded border border-graphite/20 dark:border-white/20 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors inline-flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
           >
             Next <ChevronRight size={14} />
           </button>

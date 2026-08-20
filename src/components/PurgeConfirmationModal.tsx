@@ -56,7 +56,7 @@ export const PurgeConfirmationModal: React.FC<PurgeConfirmationModalProps> = ({
       aria-modal="true"
       aria-labelledby="purge-modal-title"
     >
-      <div className="bg-stone dark:bg-graphite border border-graphite/20 dark:border-white/15 rounded-panel shadow-xl w-full max-w-xl max-h-[90vh] flex flex-col transition-colors">
+      <div className="bg-white dark:bg-graphite border border-graphite/20 dark:border-white/20 rounded-panel shadow-xl dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] w-full max-w-xl max-h-[90vh] flex flex-col transition-colors">
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-graphite/10 dark:border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -76,7 +76,7 @@ export const PurgeConfirmationModal: React.FC<PurgeConfirmationModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="p-1.5 rounded-panel text-gray-500 hover:text-graphite dark:text-gray-400 dark:hover:text-stone hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            className="p-1.5 rounded-panel text-gray-500 hover:text-graphite dark:text-gray-400 dark:hover:text-stone hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2"
           >
             <X size={18} />
           </button>
@@ -171,7 +171,7 @@ export const PurgeConfirmationModal: React.FC<PurgeConfirmationModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/15 dark:hover:bg-gray-800 text-graphite inline-flex items-center justify-center font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal px-4 py-2 text-sm"
+            className="bg-stone border border-graphite/20 hover:bg-gray-100 dark:bg-graphite dark:text-stone dark:border-white/20 dark:hover:bg-gray-800 text-graphite inline-flex items-center justify-center font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2 px-4 py-2 text-sm"
           >
             Cancel
           </button>
@@ -179,7 +179,7 @@ export const PurgeConfirmationModal: React.FC<PurgeConfirmationModalProps> = ({
             type="button"
             onClick={handlePurge}
             disabled={selectedEntries.size === 0}
-            className="bg-rust hover:bg-rust/90 text-white inline-flex items-center gap-1.5 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-rust hover:bg-rust/90 text-white inline-flex items-center gap-1.5 font-medium rounded-panel transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-signal ring-offset-white dark:ring-offset-graphite focus-visible:ring-offset-2 px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Trash2 size={16} />
             <span>Purge Flagged Secrets ({selectedEntries.size})</span>
